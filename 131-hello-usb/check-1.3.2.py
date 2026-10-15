@@ -54,4 +54,4 @@ else:
     print("Плата на порту " + board.device + ", слушаю %d секунд" % DURATION_S, end="\r\n")
     lines = listen(board)
     write_log(board, lines)
-    print("Принято строк: %d, лог записан в %s" % (len(lines), LOG_NAME), end="\r\n")
+    print("Принто строк: %d, лог записан в %s" % (len(lines), LOG_NAME), end="\r\n")
