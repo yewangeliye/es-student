@@ -29,7 +29,7 @@ def talk(board):
         started = time.monotonic()
         for command in COMMANDS:
             port.write(command.encode("ascii"))
-            exchange.append((time.monotonic() - started, "--", command))
+            exchange.append((time.monotonic() - started, "-->", command))
             answer = port.readline().decode("ascii", "replace").strip()
             exchange.append((time.monotonic() - started, "<--", answer))
             print("%s → %s" % (command, answer), end="\r\n")
