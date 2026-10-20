@@ -58,7 +58,7 @@ int main()
         if (previous == true && current == false)
         {
             led_toggle();
-            printf("led %s\n", led_is_on() ? "on" : "off");
+            LOG_INF("led %s\n", led_is_on() ? "on" : "off");
         }
 
         previous=current;
