@@ -1,0 +1,13 @@
+задание: 1.3.7
+проект: 134-led-module
+устройство: 2e8a:000a
+серийный номер: 530328474890539C
+порт: COM3
+начало: 2026-10-20T21:50:39
+   0.000 --> i
+   0.007 <-- project: 134-led-module
+   0.008 <-- repo: https://github.com/yewangeliye/es-student
+   0.008 <-- board: pico
+   0.008 <-- serial: 530328474890539C
+   0.009 <-- chip: manufacturer 0x927, part 0x0000, revision 0
+итог: принято строк 5
