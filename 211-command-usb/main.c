@@ -6,8 +6,6 @@
 #include "device.h"
 #include <string.h>
 
-#define LED_PIN 25
-
 #define LINE_SIZE 32
 
 char line[LINE_SIZE];
@@ -26,119 +24,121 @@ bool get_button_debounce(uint pin)
     return state && gpio_get(pin);
 }
 
-typedef void (*command_handler_t)(void);
-
-// ==========================================
-// 2. Функции-обработчики для каждой команды
-// ==========================================
-
-void cmd_enable(void)
-{
-    gpio_put(LED_PIN, 1);
-    printf("LED enabled\n");
-}
-
-void cmd_disable(void)
-{
-    gpio_put(LED_PIN, 0);
-    printf("LED disabled\n");
-}
-
-void cmd_info(void)
-{
-    printf("Device: Raspberry Pi Pico USB Command Controller\n");
-}
-
-void cmd_version(void)
-{
-    printf("Firmware version: 2.1.1\n");
-}
-
-// 5. Добавлена новая команда ping
-void cmd_ping(void)
-{
-    printf("pong\n");
-}
-
-// ==========================================
-// 3. Собрать таблицу команд
-// ==========================================
-struct command_t 
-{
-    const char *name;
-    command_handler_t handler;
-};
-
-const struct command_t commands[] = {
-    { "enable",  cmd_enable },
-    { "disable", cmd_disable },
-    { "info",    cmd_info },
-    { "version", cmd_version },
-    { "ping",    cmd_ping }, 
-};
-
-// Исправлено: корректный подсчет размера массива
-#define COMMAND_COUNT (sizeof(commands) / sizeof(commands[0]))
-
-// ==========================================
-// 4. Функция поиска команды по таблице
-// ==========================================
 void handle_command(const char *command)
 {
-    for (uint i = 0; i < COMMAND_COUNT; i++)
+    if (strcmp(command,"enable")==0)
     {
-        if (strcmp(command, commands[i].name) == 0)
-        {
-            if (commands[i].handler != NULL)
-            {
-                commands[i].handler();
-            }
-            return;
-        }
+        led_set(true);
+        LOG_INF("led on\n");
     }
-    
-    LOG_ERR("unknown command: %s\n", command);
+    else if (strcmp(command,"disable")==0)
+    {
+        led_set(false);
+        LOG_INF("led off\n");
+    }
+
+    else if (strcmp(command,"version")==0)
+    {
+        log_version();
+    }
+
+    else if (strcmp(command, "info") == 0)
+    {
+        device_info();
+    }
+
+    else
+    {
+        LOG_ERR("unknown command: %s\n", command);
+    }
 }
 
-// ==========================================
-// Главная функция
-// ==========================================
-int main() 
+void read_line(void)
 {
-    // Инициализация стандартного ввода-вывода (USB Serial)
-    stdio_init_all();
-    
-    // Инициализация пина светодиода
-    gpio_init(LED_PIN);
-    gpio_set_dir(LED_PIN, GPIO_OUT);
+    int symbol = getchar_timeout_us(0);
 
-    char input_buffer[64];
-    int buf_idx = 0;
-    
-    while (true) 
+    if (symbol == PICO_ERROR_TIMEOUT)
     {
-        // Чтение символов из USB в неблокирующем режиме
-        int ch = getchar_timeout_us(0);
-        
-        if (ch != PICO_ERROR_TIMEOUT) 
-        {
-            // Если пришел символ перевода строки — команда завершена
-            if (ch == '\r' || ch == '\n') 
-            {
-                if (buf_idx > 0) 
-                {
-                    input_buffer[buf_idx] = '\0'; // Закрываем строку c-string
-                    handle_command(input_buffer); // Отправляем на разбор в таблицу
-                    buf_idx = 0;                  // Сбрасываем буфер для новой команды
-                }
-            } 
-            // Защита от переполнения буфера
-            else if (buf_idx < sizeof(input_buffer) - 1) 
-            {
-                input_buffer[buf_idx++] = (char)ch;
-            }
-        }
-        
-        sleep_ms(10);
+        return;
     }
+
+    // Если пришел символ конца строки (\n или \r)
+    if (symbol == '\r' || symbol == '\n')
+    {
+        if (line_length > 0)
+        {
+            line[line_length] = '\0';
+
+            // 1. Скрипт Питона ждет строгое эхо всей команды одной строкой:
+            printf("%s\n", line);
+            fflush(stdout); // Моментально отправляем эхо в порт
+
+            // 2. Вызываем обработчик (он напечатает логи inf/err или паспорт)
+            handle_command(line);
+            fflush(stdout); // Моментально отправляем ответы команды в порт
+
+            line_length = 0;
+        }
+        return;
+    }
+
+    // Просто собираем символы в буфер БЕЗ putchar(symbol)
+    if (line_length + 1 < LINE_SIZE)
+    {
+        line[line_length] = (char)symbol;
+        line_length = line_length + 1;
+    }
+}
+
+int main()
+{
+    stdio_init_all();
+
+    led_init();
+
+    gpio_init(BUTTON_PIN);
+    gpio_set_dir(BUTTON_PIN,GPIO_IN);
+    gpio_pull_up(BUTTON_PIN);
+
+    bool previous = true; 
+    bool current  = true;
+
+    char command[32];
+    int command_pos=0;
+
+    while (1)
+    {
+        bool current = get_button_debounce(BUTTON_PIN); 
+
+        if (previous == true && current == false)
+        {
+            led_toggle();
+            LOG_INF("led %s\n", led_is_on() ? "on" : "off");
+        }
+
+        previous=current;
+
+        int c = getchar_timeout_us(0);
+
+        if (c == PICO_ERROR_TIMEOUT)
+        {
+            continue;
+        }
+        if (c == '\r' || c == '\n')
+        {
+            if(command_pos > 0)
+            {
+                command[command_pos]='\0';
+                LOG_DBG("got %s\n", c);
+                handle_command(command);
+
+                command_pos = 0;
+
+            }
+    }
+    else if(command_pos < sizeof(command)-1)
+    {
+        command[command_pos++]=(char)c;
+    }
+}
 }
