@@ -3,19 +3,18 @@
 #include "pico/stdlib.h"
 #include "hardware/regs/addressmap.h"
 
-// Исправлено: добавлены двойные подчеркивания к системным символам линкера
 extern char __flash_binary_start;
 extern char __flash_binary_end;
 extern char __boot2_start__;
 extern char __boot2_end__;
-extern char __etext;          // Было: _etext
+extern char __etext;
 extern char __data_start__;
 extern char __data_end__;
 extern char __bss_start__;
 extern char __bss_end__;
 extern char __HeapLimit;
-extern char __StackBottom;    // Было: _StackBottom
-extern char __StackTop;       // Было: _StackTop
+extern char __StackBottom;
+extern char __StackTop;
 
 static void row(const char *name, uintptr_t start, uintptr_t end)
 {
@@ -38,7 +37,6 @@ void mem_info(void)
     row("sram",  sram_start,  sram_end);
     row("rom",   rom_start,   rom_end);
 
-    // Исправлено: обновлено взятие адресов с учетом новых имен переменных
     uintptr_t img_start        = (uintptr_t)&__flash_binary_start;
     uintptr_t img_end          = (uintptr_t)&__flash_binary_end;
     uintptr_t b2_start         = (uintptr_t)&__boot2_start__;
@@ -86,5 +84,5 @@ void mem_info(void)
     printf("    ram used     %5u = data %u + bss %u\n", 
            ram_used, size_dt_ram, size_bss);
     printf("    ram free     %5u for heap and %u for stack\n", 
-           ram_free, size_heap);
+           ram_free, size_stack);
 }
