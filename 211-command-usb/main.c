@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include "device.h"
 #include <string.h>
+#include "memory.h"
 
 #define LOG_ERR(fmt, ...) printf(fmt, __VA_ARGS__) 
 
@@ -75,6 +76,7 @@ const struct command_t commands[] = {
     { "info",    cmd_info },
     { "version", cmd_version },
     { "ping",    cmd_ping }, 
+    { "mem_info", mem_info },
 };
 
 #define COMMAND_COUNT (sizeof(commands) / sizeof(commands[0]))
