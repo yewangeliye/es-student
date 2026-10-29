@@ -78,6 +78,6 @@ int main()
         }
 
         LOG_DBG("got %c\n", command);
-        handle_command(command);
+        handle_command(char command);
     }
 }
