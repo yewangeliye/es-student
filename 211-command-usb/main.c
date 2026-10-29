@@ -22,7 +22,6 @@ const uint BUTTON_PIN = 15;
 const uint DEBOUNCE_MS = 20;
 
 
-
 void cmd_enable(void);
 void cmd_disable(void);
 void cmd_info(void);
@@ -31,6 +30,7 @@ void cmd_ping(void);
 void cmd_version(void);
 void cmd_mem_info(void);
 void cmd_fw_info(void);
+void cmd_dev_info(void);
 
 const struct command_t commands[] = {
     { "enable", cmd_enable },
@@ -40,39 +40,40 @@ const struct command_t commands[] = {
     { "ping", cmd_ping },
 	{ "mem_info", cmd_mem_info },
 	{ "fw_info", cmd_fw_info },
+	{ "dev_info", cmd_dev_info },
 };
 
 const uint command_count = sizeof(commands) / sizeof(commands[0]);
 
 void cmd_enable(void)
 {
-    // включаем светодиод и сообщаем новое состояние
+   
 	led_set(true);
 	LOG_INF("led %s\n", led_is_on() ? "on" : "off");
 }
 
 void cmd_disable(void)
 {
-    // выключаем светодиод и сообщаем новое состояние
+    
 	led_set(false);
 	LOG_INF("led %s\n", led_is_on() ? "on" : "off");
 }
 
 void cmd_info(void)
 {
-    // печатаем паспорт устройства
+    
 	device_info();
 }
 
 void cmd_version(void)
 {
-    // печатаем строку журнала о версии прошивки
+    
 	log_version();
 }
 
 void cmd_ping(void)
 {
-    // печатаем строку журнала о версии прошивки
+    
 	printf("pong\n");
 }
 
@@ -86,6 +87,10 @@ void cmd_fw_info(void)
 	fw_info();
 }
 
+void cmd_dev_info(void)
+{
+	dev_info();
+}
 
 bool get_button_debounce(uint pin)
 {
@@ -135,6 +140,7 @@ void read_line(void)
         line_length = 0;
         return;
     }
+
 
     if (line_length + 1 < LINE_SIZE)
     {
