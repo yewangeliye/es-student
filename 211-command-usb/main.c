@@ -31,6 +31,7 @@ void cmd_version(void);
 void cmd_mem_info(void);
 void cmd_fw_info(void);
 void cmd_dev_info(void);
+void cmd_boot_info(void);
 
 const struct command_t commands[] = {
     { "enable", cmd_enable },
@@ -41,13 +42,14 @@ const struct command_t commands[] = {
 	{ "mem_info", cmd_mem_info },
 	{ "fw_info", cmd_fw_info },
 	{ "dev_info", cmd_dev_info },
+	{ "boot_info", cmd_boot_info },
 };
 
 const uint command_count = sizeof(commands) / sizeof(commands[0]);
 
 void cmd_enable(void)
 {
-   
+    
 	led_set(true);
 	LOG_INF("led %s\n", led_is_on() ? "on" : "off");
 }
@@ -90,6 +92,11 @@ void cmd_fw_info(void)
 void cmd_dev_info(void)
 {
 	dev_info();
+}
+
+void cmd_boot_info(void)
+{
+	boot_info();
 }
 
 bool get_button_debounce(uint pin)
@@ -140,7 +147,6 @@ void read_line(void)
         line_length = 0;
         return;
     }
-
 
     if (line_length + 1 < LINE_SIZE)
     {
