@@ -77,7 +77,7 @@ int main()
             continue;
         }
 
-        LOG_DBG("got %c\n", command);
-        handle_command(char command);
+        
+        handle_command(command);
     }
 }
