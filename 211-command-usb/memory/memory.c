@@ -1,7 +1,12 @@
 #include <stdio.h>
-#include "memory.h"
-#include "pico/stdlib.h"
+#include <stdint.h>
 #include "hardware/regs/addressmap.h"
+#include "pico/stdlib.h"
+#include "memory.h"
+
+
+
+
 
 extern char __flash_binary_start;
 extern char __flash_binary_end;
@@ -24,65 +29,65 @@ static void row(const char *name, uintptr_t start, uintptr_t end)
 
 void mem_info(void)
 {
-    printf("%-10s %-10s %-10s %-8s\n", "area", "start", "end", "size");
+    // шапка таблицы: область, начало, конец, размер
+	printf("%-10s %-10s %-10s %-10s\n",
+           "area", "start", "end", "size");
 
-    uintptr_t flash_start = XIP_BASE;
-    uintptr_t flash_end   = XIP_BASE + PICO_FLASH_SIZE_BYTES;
-    uintptr_t sram_start  = SRAM_BASE;
-    uintptr_t sram_end    = SRAM_END;
-    uintptr_t rom_start   = ROM_BASE;
-    uintptr_t rom_end     = ROM_BASE + 16 * 1024;
+    // flash — XIP_BASE и PICO_FLASH_SIZE_BYTES
+	row("flash", XIP_BASE, (XIP_BASE + PICO_FLASH_SIZE_BYTES));
 
-    row("flash", flash_start, flash_end);
-    row("sram",  sram_start,  sram_end);
-    row("rom",   rom_start,   rom_end);
+	// sram — базовый адрес из SDK, размер из datasheet
+	row("sram", SRAM_BASE, (270336 + SRAM_BASE));
 
-    uintptr_t img_start        = (uintptr_t)&__flash_binary_start;
-    uintptr_t img_end          = (uintptr_t)&__flash_binary_end;
-    uintptr_t b2_start         = (uintptr_t)&__boot2_start__;
-    uintptr_t b2_end           = (uintptr_t)&__boot2_end__;
-    uintptr_t txt_start        = (uintptr_t)&__boot2_end__;
-    uintptr_t txt_end          = (uintptr_t)&__etext;
-    uintptr_t dt_flash_start   = (uintptr_t)&__etext;
-    uintptr_t dt_flash_end     = (uintptr_t)&__etext + ((uintptr_t)&__data_end__ - (uintptr_t)&__data_start__);
-    uintptr_t dt_ram_start     = (uintptr_t)&__data_start__;
-    uintptr_t dt_ram_end       = (uintptr_t)&__data_end__;
-    uintptr_t bss_start        = (uintptr_t)&__bss_start__;
-    uintptr_t bss_end          = (uintptr_t)&__bss_end__;
-    uintptr_t heap_start       = (uintptr_t)&__bss_end__;
-    uintptr_t heap_end         = (uintptr_t)&__HeapLimit;
-    uintptr_t stack_start      = (uintptr_t)&__StackBottom;
-    uintptr_t stack_end        = (uintptr_t)&__StackTop;
+	// rom — базовый адрес из SDK, размер из datasheet
+	row("rom", ROM_BASE, (16384 - ROM_BASE));
 
-    row("image",      img_start,      img_end);
-    row("free",       img_end,        flash_end);
-    row("boot2",      b2_start,       b2_end);
-    row("text",       txt_start,      txt_end);
-    row("data flash", dt_flash_start, dt_flash_end);
-    row("data ram",   dt_ram_start,   dt_ram_end);
-    row("bss",        bss_start,      bss_end);
-    row("heap",       heap_start,     heap_end);
-    row("stack",      stack_start,    stack_end);
+    // image — от __flash_binary_start до __flash_binary_end
+	row("image", (uintptr_t)&__flash_binary_start, (uintptr_t)&__flash_binary_end);
 
-    unsigned size_img      = img_end - img_start;
-    unsigned size_boot2    = b2_end - b2_start;
-    unsigned size_text     = txt_end - txt_start;
-    unsigned size_dt_ram   = dt_ram_end - dt_ram_start;
-    unsigned size_free     = flash_end - img_end;
-    unsigned size_flash    = flash_end - flash_start;
-    unsigned size_bss      = bss_end - bss_start;
-    unsigned size_heap     = heap_end - heap_start;
-    unsigned size_stack    = stack_end - stack_start;
+	// free  — от __flash_binary_end до конца флеш-памяти
+	row("free", (uintptr_t)&__flash_binary_end, (XIP_BASE + PICO_FLASH_SIZE_BYTES));
 
-    unsigned ram_used      = size_dt_ram + size_bss;
-    unsigned ram_free      = size_heap + size_stack;
+    // boot2 — от __boot2_start__ до __boot2_end__
+	row("boot2", (uintptr_t)&__boot2_start__, (uintptr_t)&__boot2_end__);
 
-    printf("\ntotal\n");
-    printf("    flash image  %5u = boot2 %u + text %u + data %u\n", 
-           size_img, size_boot2, size_text, size_dt_ram);
-    printf("    flash free   %u of %u\n", size_free, size_flash);
-    printf("    ram used     %5u = data %u + bss %u\n", 
-           ram_used, size_dt_ram, size_bss);
-    printf("    ram free     %5u for heap and %u for stack\n", 
-           ram_free, size_stack);
-}
+    // text  — от __boot2_end__ до __etext: код и константы
+	row("text", (uintptr_t)&__boot2_end__, (uintptr_t)&__etext);
+
+    // data flash — хранение .data, от __etext, длиной с .data
+	row("data flash", (uintptr_t)&__etext, ((uintptr_t)&__etext +
+			(uintptr_t)&__data_end__ - (uintptr_t)&__data_start__));
+
+	// data ram   — работа .data, от __data_start__ до __data_end__
+	row("data ram", (uintptr_t)&__data_start__, (uintptr_t)&__data_end__);
+
+    // bss        — от __bss_start__ до __bss_end__
+	row("bss", (uintptr_t)&__bss_start__, (uintptr_t)&__bss_end__);
+
+    // heap       — от __bss_end__ до __HeapLimit
+	row("heap", (uintptr_t)&__bss_end__, (uintptr_t)&__HeapLimit);
+
+    // stack      — от __StackBottom до __StackTop
+	row("stack", (uintptr_t)&__StackBottom, (uintptr_t)&__StackTop);
+
+	printf("\ntotal\n");
+    // итог: образ во флеш и из чего он сложился
+	printf("\tflash image\t %8u = boot2 %8u + text  %8u + data %8u\n",
+			((&__boot2_end__ - &__boot2_start__) + (&__etext - &__boot2_end__) + 			(&__data_end__ - &__data_start__)),
+				(&__boot2_end__ - &__boot2_start__),
+			(&__etext - &__boot2_end__),
+			(&__data_end__ - &__data_start__));
+    // итог: свободно во флеш-памяти из всего её объёма
+	printf("\tflash free\t %8u of %8u\n",
+			(XIP_BASE + PICO_FLASH_SIZE_BYTES - (uintptr_t)&__flash_binary_end),
+			(PICO_FLASH_SIZE_BYTES));
+    // итог: занято в ОЗУ — .data и .bss
+	printf("\tram used\t %8u = data %8u + bss %8u\n",
+			((&__data_end__ - &__data_start__) + (&__bss_end__ - &__bss_start__)),
+			(&__data_end__ - &__data_start__),
+			(&__bss_end__ - &__bss_start__));
+    // итог: свободно в ОЗУ — под кучу и под стек
+	printf("\tram free\t %8u for heap and %8u for stack\n",
+			(&__HeapLimit - &__bss_end__),
+			(&__StackTop - &__StackBottom));
+       }

@@ -1,7 +1,4 @@
-#ifndef MEMORY_H
-#define MEMORY_H
+#pragma once
 
-// Исправлено: имя функции строго по методичке
+static void row(const char *name, uintptr_t start, uintptr_t end);
 void mem_info(void);
-
-#endif // MEMORY_H
