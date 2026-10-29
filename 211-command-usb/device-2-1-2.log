@@ -1,0 +1,17 @@
+задание: 2.1.2
+проект: 211-command-usb
+устройство: 2e8a:000a
+серийный номер: 530328474890539C
+порт: COM3
+начало: 2026-10-29T14:10:44
+   0.000 --> enable
+   0.069 <-- LED enabled
+   2.097 --> disable
+   2.169 <-- LED disabled
+   4.195 --> info
+   4.241 <-- Device: Raspberry Pi Pico USB Command Controller
+   6.248 --> ping
+   6.290 <-- pong
+   8.345 --> nosuchcommand
+   8.482 <-- err handle_command:100 unknown command: nosuchcommand
+итог: отправлено команд 5, принято строк 5
