@@ -3,20 +3,20 @@
 устройство: 2e8a:000a
 серийный номер: 530328474890539C
 порт: COM3
-начало: 2026-11-03T22:09:14
+начало: 2026-11-03T22:18:05
    0.000 --> clk_info
-   0.172 <-- clk_info
-   0.173 <-- dbg read_line:152 got clk_info
-   0.174 <-- name       set_khz measured_khz
-   0.175 <-- clk_ref      12000        12001
-   0.175 <-- clk_sys     125000       125000
-   0.176 <-- clk_peri    125000       125000
-   0.178 <-- clk_usb      48000        48000
-   0.179 <-- clk_adc      48000        48000
-   0.179 <-- ROSC             -         6078
-   2.013 --> info
-   2.100 <-- info
-   2.100 <-- dbg read_line:152 got info
+   0.171 <-- clk_info
+   0.171 <-- dbg read_line:152 got clk_info
+   0.172 <-- name       set_khz measured_khz
+   0.173 <-- clk_ref      12000        12001
+   0.174 <-- clk_sys     125000       125001
+   0.175 <-- clk_peri    125000       125000
+   0.176 <-- clk_usb      48000        48000
+   0.177 <-- clk_adc      48000        48000
+   0.178 <-- rosc             -         6084
+   2.009 --> info
+   2.099 <-- info
+   2.099 <-- dbg read_line:152 got info
    2.100 <-- project: 221-command-time
    2.101 <-- repo: https://github.com/Clair-G/es-student
    2.101 <-- board: pico
