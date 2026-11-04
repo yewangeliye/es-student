@@ -5,7 +5,7 @@ set(PICO_PLATFORM rp2040)
 
 include(pico_sdk_import.cmake)
 
-project(221_command_time)
+project(231_firmware_template)
 
 pico_sdk_init()
 add_executable(${PROJECT_NAME}
