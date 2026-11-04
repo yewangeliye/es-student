@@ -18,7 +18,7 @@ void stdio_text_protocol_init(void)
 
 const command_t *stdio_text_protocol_handle(void)
 {
-	
+	// читаем символ без ожидания; нет символа — возвращаем NULL
 	int symbol = getchar_timeout_us(0);
 
     if (symbol == PICO_ERROR_TIMEOUT)
@@ -26,53 +26,61 @@ const command_t *stdio_text_protocol_handle(void)
         return NULL;
     }
 
-    
+    // конец строки: пустую строку пропускаем, иначе переводим строку в терминале,
+    // делим строку на слова и возвращаем команду
 	if (symbol == '\r' || symbol == '\n')
     {
         if (line_length == 0)
 			return NULL;
-		
+
 		putchar('\n');
         line[line_length] = '\0';
 
-    
-		
+    //    LOG_DBG("got %s\n", line);
+
         if (command.truncated == false)
 			parse_command();
 		line_length = 0;
 		return &command;
     }
-    
-	
+
+	// Backspace (0x08 или 0x7f): убираем последний символ и стираем его на экране "\b \b"
 	if (symbol == 0x08 || symbol == 0x7f)
 	{
 		if (line_length)
 			line_length = line_length - 1;
 		printf("\b \b");
-		return NULL;
+		
+		
 	}
-    
+
 	
-	if (line_length + 1 < STDIO_TEXT_PROTOCOL_LINE_SIZE)
-    {
-        command.truncated = false;
-		line[line_length] = (char)symbol;
-        line_length = line_length + 1;
-        putchar(symbol);
-    }
-    
-	else
-    {
-		command.truncated = true;
-    }
+	if (symbol >= 0x20 && symbol <=0x7e)
+	{
+		if (line_length + 1 < STDIO_TEXT_PROTOCOL_LINE_SIZE)
+		{
+			command.truncated = false;
+			line[line_length] = (char)symbol;
+			line_length = line_length + 1;
+			putchar(symbol);
+		}
+		// буфер полон — помечаем строку как переполненную
+		//if (line_length >= STDIO_TEXT_PROTOCOL_LINE_SIZE)
+		else
+		{
+			command.truncated = true;
+		}
+	}
+	
 	return NULL;
 }
+
 
 void parse_command(void)
 {	
 	command.name = '\0';
 	command.argc = 0;
-	
+
 	for (int i = 0; i < line_length; i++)
 		{
 			if (line[i] == ' ') 
@@ -98,7 +106,7 @@ void parse_command(void)
 					}
 				}
 			}
-			
+
 			if (command.argc > 5) 
 			{ 	
 				command.truncated = true;

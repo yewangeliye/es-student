@@ -24,7 +24,7 @@ void log_prefix(const char *level, const char *function, int line);
         }                                           \
     } while (0)
 
-		
+
 #define LOG_ERR(...)                                \
     do                                              \
     {                                               \
@@ -34,8 +34,8 @@ void log_prefix(const char *level, const char *function, int line);
             printf(__VA_ARGS__);                    \
         }                                           \
     } while (0)
-		
-	
+
+
 #define LOG_DBG(...)                                \
     do                                              \
     {                                               \
