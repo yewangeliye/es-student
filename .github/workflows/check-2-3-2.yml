@@ -1,7 +1,17 @@
-name:  2.3.2 Задача светодиода
+name: 2.3.2 Задача светодиода
+
 on:
   push:
+    paths:
+      - '231-firmware-template/**'
+      - 'libs/**'
+      - '.github/workflows/check-2-3-2.yml'
   workflow_dispatch:
+
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   check:
