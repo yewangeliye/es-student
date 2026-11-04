@@ -17,14 +17,14 @@ char line[LINE_SIZE];
 uint line_length = 0;
 
 
-const uint BLINK_HALF_PERIOD_MS = 500;
+const uint CALC_PI_TERMS = 1000000;
 
+const uint BLINK_HALF_PERIOD_MS = 500;
 
 uint64_t last_toggle_us = 0;
 
+volatile double pi_result;
 
-void cmd_enable(void);
-void cmd_disable(void);
 void cmd_info(void);
 void cmd_version(void);
 void cmd_ping(void);
@@ -35,38 +35,38 @@ void cmd_dev_info(void);
 void cmd_boot_info(void);
 void cmd_clk_info(void);
 void cmd_uptime(void);
+void cmd_calc_pi(void);
 
 const struct command_t commands[] = {
     { "info", cmd_info },
     { "version", cmd_version },
     { "ping", cmd_ping },
-    { "mem_info", cmd_mem_info },
+	{ "mem_info", cmd_mem_info },
 	{ "fw_info", cmd_fw_info },
 	{ "dev_info", cmd_dev_info },
 	{ "boot_info", cmd_boot_info },
 	{ "clk_info", cmd_clk_info },
 	{ "uptime", cmd_uptime },
+	{ "calc_pi", cmd_calc_pi },
 };
 
 const uint command_count = sizeof(commands) / sizeof(commands[0]);
 
-
-
 void cmd_info(void)
 {
-    // печатаем паспорт устройства
+    
 	device_info();
 }
 
 void cmd_version(void)
 {
-    // печатаем строку журнала о версии прошивки
+    
 	log_version();
 }
 
 void cmd_ping(void)
 {
-    // печатаем строку журнала о версии прошивки
+    
 	printf("pong\n");
 }
 
@@ -95,12 +95,10 @@ void cmd_clk_info(void)
 	clk_info();
 }
 
-
 void cmd_uptime(void)
 {
 	uptime();
 }
-
 
 void handle_command(const char *command)
 {
@@ -163,6 +161,31 @@ void blink(void)
     }
 }
 
+double calc_pi(uint terms)
+{
+    
+	double summ = 0;
+	double sign = 1;
+    
+	for (int k = 0; k < terms; k++)
+	{
+		summ += sign / (2.0 * k + 1.0);
+        sign = -sign;
+	}
+    
+	return 4.0*summ;
+}
+
+void cmd_calc_pi(void)
+{
+    uint64_t start_us = time_us_64();
+    pi_result = calc_pi(CALC_PI_TERMS);
+    uint64_t spent_us = time_us_64() - start_us;
+
+    printf("pi: %.8f\n", pi_result);
+    printf("time: %llu ms\n", spent_us / 1000);
+}
+
 
 
 int main()
@@ -170,14 +193,12 @@ int main()
 	stdio_init_all();
 	led_init();
 
-	
-	 
     while (1)
     {
-        
         blink();
 
 		read_line();
 
     }
 }
+
