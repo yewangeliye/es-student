@@ -41,7 +41,7 @@ const api_command_t api_commands[] = {
 	{ "button", "button", cmd_button },
 };
 
-const uint api_command_count = sizeof(api_commands) / sizeof(api_commands[0]);
+const uint32_t api_command_count = sizeof(api_commands) / sizeof(api_commands[0]);
 
 
 void cmd_info(const command_t *command)

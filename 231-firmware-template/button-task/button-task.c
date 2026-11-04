@@ -1,4 +1,5 @@
-#include "button-task/button-task.h"
+#include "button-task.h"
+#include "led-task/led-task.h"
 #include "pico/stdlib.h"
 #include "hardware/gpio.h"
 
@@ -43,15 +44,14 @@ void button_task_handle(void)
     // читаем уровень: нажатая кнопка замыкает вывод на землю и даёт ноль
     // читаем часы
 
-	
 	bool pin_state = gpio_get(BUTTON_PIN); 
 	uint64_t now_us = time_us_64();
-	
+
     switch (button_state)
     {
     // переходы по таблице; при переходе в «нажата»
     // увеличиваем счётчик и вызываем led_task_next_state()
-	
+
 		case BUTTON_STATE_RELEASED:
 		{
 			if (!pin_state)
@@ -69,12 +69,13 @@ void button_task_handle(void)
 				{
 					button_state = BUTTON_STATE_PRESSED;
 					presses++;
+					led_task_next_state();
 				}
 				else 
 					button_state = BUTTON_STATE_RELEASED;
 			}	
 			break;
-			
+
 		}
 		case BUTTON_STATE_PRESSED:
 		{
@@ -96,15 +97,9 @@ void button_task_handle(void)
 			}
 			break;
 		}
-		
+
     }
 }
-
-void led_task_next_state(void)
-{
-	
-}
-
 
 
 bool button_task_is_pressed(void)
