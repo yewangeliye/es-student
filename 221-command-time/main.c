@@ -11,7 +11,8 @@
 
 #include "pico/stdlib.h"
 
-#define LOG_LEVEL LOG_LEVEL_ERR
+
+
 
 #define LINE_SIZE 32
 
@@ -41,6 +42,8 @@ void cmd_uptime(void);
 void cmd_calc_pi(void);
 void cmd_main_time_exec(void);
 void cmd_main_time_reset(void);
+void cmd_clk_sys_low(void);
+void cmd_clk_sys_default(void);
 
 const struct command_t commands[] = {
     { "info", cmd_info },
@@ -55,6 +58,8 @@ const struct command_t commands[] = {
 	{ "calc_pi", cmd_calc_pi },
 	{ "main_time_exec", cmd_main_time_exec },
 	{ "main_time_reset", cmd_main_time_reset },
+	{ "clk_sys_low", cmd_clk_sys_low },
+	{ "clk_sys_default", cmd_clk_sys_default },
 };
 
 const uint command_count = sizeof(commands) / sizeof(commands[0]);
@@ -67,13 +72,13 @@ void cmd_info(void)
 
 void cmd_version(void)
 {
-   
+    
 	log_version();
 }
 
 void cmd_ping(void)
 {
-   
+    
 	printf("pong\n");
 }
 
@@ -117,6 +122,18 @@ void cmd_main_time_reset(void)
 	profiling_reset_max();
 	printf("max reset\n");
 }
+
+void cmd_clk_sys_low(void)
+{
+	clk_sys_low();
+}
+
+void cmd_clk_sys_default(void)
+{
+	clk_sys_default();
+}
+
+
 
 
 void handle_command(const char *command)
@@ -182,6 +199,7 @@ void blink(void)
 
 double calc_pi(uint terms)
 {
+    
 	double summ = 0;
 	double sign = 1;
     
@@ -203,6 +221,7 @@ void cmd_calc_pi(void)
     printf("pi: %.8f\n", pi_result);
     printf("time: %llu ms\n", spent_us / 1000);
 }
+
 
 
 int main()
