@@ -2,6 +2,7 @@
 #include <string.h>
 
 #include "led-task/led-task.h"
+#include "button-task/button-task.h"
 #include "log.h"
 #include "device.h"
 #include "profiling.h"
@@ -17,10 +18,7 @@
 // 1 000 000 членов по 585 тактов при 125 МГц — около 4,7 с
 //const uint CALC_PI_TERMS = 1000000;
 
-
-
 extern volatile double pi_result;
-
 
 
 
@@ -30,13 +28,15 @@ int main()
 	profiling_init();
 	stdio_text_protocol_init();
 	led_task_init();
+	button_task_init();
+
 
     while (1)
     {
         profiling_iteration();
 		led_task_handle();
+		button_task_handle();
 
-		
 		const command_t *command = stdio_text_protocol_handle();
 		if (command != NULL)
 		{
@@ -44,5 +44,3 @@ int main()
 		}
 
     }
-}
-

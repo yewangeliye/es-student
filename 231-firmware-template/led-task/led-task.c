@@ -2,11 +2,12 @@
 
 #include "pico/stdlib.h"
 
-// Состояние задачи: внутреннее связывание, только для этого файла
+
 static led_state_t led_state;
 static uint64_t half_period_us;
 static uint64_t last_toggle_us;
 static const uint32_t DEFAULT_LED_BLINK_PERIOD_MS=1000;
+
 
 static bool period_elapsed(uint64_t *last_us, uint64_t period_us)
 {
@@ -27,7 +28,8 @@ static bool period_elapsed(uint64_t *last_us, uint64_t period_us)
 
     return true;
 }
-// Вспомогательная функция
+
+
 static void led_set(bool on)
 {
     gpio_put(PICO_DEFAULT_LED_PIN, on);
@@ -35,8 +37,7 @@ static void led_set(bool on)
 
 bool led_task_set_period_ms(uint32_t period_ms)
 {
-    // С нулевым полупериодом светодиод переключался бы
-    // на каждой итерации: такой период не принимается
+    
     if (period_ms == 0) {
         return false;
     }
@@ -76,7 +77,6 @@ void led_task_set_state(led_state_t state)
 		}
 
 
-	//	gpio_put(LED_PIN, led_state);
 	}
 }
 
@@ -88,11 +88,11 @@ led_state_t led_task_get_state(void)
 void led_task_handle(void)
 {
     switch (led_state)
-    {	// «выключен» и «горит» — ничего не делаем, светодиод установлен при входе
+    {	
 		case LED_STATE_OFF:
 		case LED_STATE_ON:
 			break;
-	    // «мигает» — каждые полпериода переключаем светодиод
+	    
 		case LED_STATE_BLINK:
 			if (period_elapsed(&last_toggle_us, half_period_us)) 
 			{
@@ -106,3 +106,4 @@ uint32_t led_task_get_period_ms(void)
 {
 	return (uint32_t)(half_period_us / 500);
 }
+
