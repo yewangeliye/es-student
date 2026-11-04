@@ -1,0 +1,63 @@
+задание: 2.2.2
+проект: 221-command-time
+устройство: 2e8a:000a
+серийный номер: 530328474890539C
+порт: COM3
+начало: 2026-11-04T10:30:39
+   0.000 --> uptime
+   0.000 <-- uptime
+   0.001 <-- dbg read_line:139 got uptime
+   0.001 <-- uptime: 214702 ms
+   0.406 --> boot_info
+   0.406 <-- boot_info
+   0.407 <-- dbg read_line:139 got boot_info
+   0.408 <-- vector table     0x10000100
+   0.408 <-- stack top      0x20042000
+   0.409 <-- reset          0x100001f7
+   0.409 <-- reset (even)   0x100001f6
+   0.409 <-- gpio in          0xd0000004
+   0.410 <-- led bit        0
+   0.410 <-- gpio_get       0
+   0.826 --> uptime
+   0.826 <-- uptime
+   0.827 <-- dbg read_line:139 got uptime
+   0.828 <-- uptime: 215527 ms
+   1.233 --> boot_info
+   1.234 <-- boot_info
+   1.235 <-- dbg read_line:139 got boot_info
+   1.236 <-- vector table     0x10000100
+   1.236 <-- stack top      0x20042000
+   1.237 <-- reset          0x100001f7
+   1.237 <-- reset (even)   0x100001f6
+   1.238 <-- gpio in          0xd0000004
+   1.238 <-- led bit        1
+   1.238 <-- gpio_get       1
+   1.653 --> uptime
+   1.653 <-- uptime
+   1.704 <-- dbg read_line:139 got uptime
+   1.706 <-- uptime: 216355 ms
+   2.122 --> boot_info
+   2.123 <-- boot_info
+   2.124 <-- dbg read_line:139 got boot_info
+   2.125 <-- vector table     0x10000100
+   2.125 <-- stack top      0x20042000
+   2.126 <-- reset          0x100001f7
+   2.126 <-- reset (even)   0x100001f6
+   2.127 <-- gpio in          0xd0000004
+   2.127 <-- led bit        1
+   2.128 <-- gpio_get       1
+   2.545 --> uptime
+   2.546 <-- uptime
+   2.546 <-- dbg read_line:139 got uptime
+   2.547 <-- uptime: 217247 ms
+   2.954 --> boot_info
+   2.954 <-- boot_info
+   2.955 <-- dbg read_line:139 got boot_info
+   2.956 <-- vector table     0x10000100
+   2.957 <-- stack top      0x20042000
+   2.957 <-- reset          0x100001f7
+   2.958 <-- reset (even)   0x100001f6
+   2.958 <-- gpio in          0xd0000004
+   2.958 <-- led bit        1
+   2.959 <-- gpio_get       1
+итог: отправлено команд 8, принято строк 48
