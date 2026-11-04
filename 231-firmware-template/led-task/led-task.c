@@ -2,7 +2,6 @@
 
 #include "pico/stdlib.h"
 
-
 static led_state_t led_state;
 static uint64_t half_period_us;
 static uint64_t last_toggle_us;
@@ -31,7 +30,7 @@ void led_task_init(void)
 {
 	gpio_init(PICO_DEFAULT_LED_PIN);
 	gpio_set_dir(PICO_DEFAULT_LED_PIN, GPIO_OUT);
-
+	
 	led_task_set_period_ms(DEFAULT_LED_BLINK_PERIOD_MS);
     led_task_set_state(LED_STATE_BLINK);
 }
@@ -57,7 +56,7 @@ void led_task_set_state(led_state_t state)
 			break;
 		}
 
-
+		
 	
 	}
 }
@@ -93,9 +92,9 @@ bool period_elapsed(uint64_t *last_us, uint64_t period_us)
 {
     uint64_t now_us = time_us_64();
 
-    
-    if (now_us - *last_us >= period_us) {
-
+    if (now_us - *last_us < period_us) {
+        return false;
+    }
 
     
     *last_us += period_us;
@@ -106,6 +105,4 @@ bool period_elapsed(uint64_t *last_us, uint64_t period_us)
     }
 
     return true;
-}
-        return false;
 }
