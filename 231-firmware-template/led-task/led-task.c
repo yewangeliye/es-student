@@ -8,6 +8,7 @@ static uint64_t half_period_us;
 static uint64_t last_toggle_us;
 static const uint32_t DEFAULT_LED_BLINK_PERIOD_MS=1000;
 
+
 static bool period_elapsed(uint64_t *last_us, uint64_t period_us)
 {
     uint64_t now_us = time_us_64();
@@ -106,27 +107,5 @@ void led_task_handle(void)
 uint32_t led_task_get_period_ms(void)
 {
 	return (uint32_t)(half_period_us / 500);
-}
-
-void led_task_next_state(void)
-{
-	 switch (led_state)
-    {	
-		case LED_STATE_OFF:
-		{
-			led_task_set_state(LED_STATE_ON);
-			break;
-		}
-		case LED_STATE_ON:
-		{
-			led_task_set_state(LED_STATE_BLINK);
-			break;
-		}
-		case LED_STATE_BLINK:
-		{
-			led_task_set_state(LED_STATE_OFF);
-			break;
-		}	
-    }
 }
 

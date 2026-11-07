@@ -106,7 +106,6 @@ void led_task_next_state(void)
 }
 
 
-
 bool button_task_is_pressed(void)
 {
 	if (!gpio_get(BUTTON_PIN)) 
