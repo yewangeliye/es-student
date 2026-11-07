@@ -1,14 +1,23 @@
-#include "api.h"
-#include "device.h"
-#include "profiling.h"
-#include "pico/stdlib.h"
-#include "led-task/led-task.h"
-#include "button-task/button-task.h"
-#include "pi-task/pi-task.h"
+#include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 #include <errno.h>
 #include <ctype.h>
-#include <stdlib.h>
+
+#include "pico/stdlib.h"
+
+#include "profiling/profiling.h"
+#include "systime/systime.h"
+#include "device/device.h"
+#include "logging/log.h"
+
+#include "led-task/led-task.h"
+#include "button-task/button-task.h"
+#include "pi-task/pi-task.h"
+
+#include "firmware.h"
+#include "api.h"
+
 
 static void cmd_info(const command_t *command);
 static void cmd_uptime(const command_t *command);
@@ -51,10 +60,10 @@ void cmd_info(const command_t *command)
 {
     device_info_t info;
 	device_get_info(&info);
-	printf("name: %s\n", DEVICE_NAME);
+	printf("name: %s\n", FIRMWARE_NAME);
 	printf("version: %s\n", FIRMWARE_VERSION);
-	printf("project: %s\n", DEVICE_PROJECT);
-    printf("repo: %s\n", DEVICE_REPO);
+	printf("project: %s\n", FIRMWARE_PROJECT);
+    printf("repo: %s\n", FIRMWARE_REPO);
     printf("board: %s\n", info.board_type);//!
     printf("serial: %s\n", info.board_id);
     printf("chip: manufacturer 0x%03lx, part 0x%04lx, revision %lu\n", info.manufacturer, info.part, info.revision);
@@ -63,7 +72,7 @@ void cmd_info(const command_t *command)
 
 void cmd_uptime(const command_t *command)
 {
-	uint64_t uptime = time_us_64() / 1000;
+	uint64_t uptime = systime_ms();
 	printf("uptime: %llu ms\n", uptime);
 }	
 
@@ -110,6 +119,7 @@ void cmd_pi(const command_t *command)
 
 void cmd_profiling(const command_t *command)
 {
+	#if PROFILING_ENABLED
 	uint32_t id = 0;
 	profiling_result_t result;
 	while (profiling_get(id, &result))
@@ -118,11 +128,14 @@ void cmd_profiling(const command_t *command)
 				result.name, result.counts, result.mean, result.max);
 		id++;
 	}
+	#else
+	
+	printf("profiling is disabled in this build\n");
+	#endif
 }
 
 void cmd_profiling_reset(const command_t *command)
 {
-	
 	profiling_reset();
 	printf("profiling reset\n");
 }
@@ -155,13 +168,11 @@ static void cmd_led_period(const command_t *command)
         return;
     }
 
-    
     if (!led_task_set_period_ms(period_ms))
     {
         printf("error: period_ms must be greater than 0\n");
         return;
     }
-
 
 	print_led_state();
 }
@@ -205,7 +216,6 @@ void api_handle(const command_t *command)
 
 static bool parse_u32(const char *text, uint32_t *value)
 {
-    
     if (!isdigit((unsigned char)text[0]))
     {
         return false;
@@ -215,7 +225,7 @@ static bool parse_u32(const char *text, uint32_t *value)
     errno = 0;
     unsigned long number = strtoul(text, &end, 10);
 
-    
+
     if (*end != '\0' || errno == ERANGE || number > UINT32_MAX)
     {
         return false;
@@ -227,16 +237,14 @@ static bool parse_u32(const char *text, uint32_t *value)
 
 double calc_pi(uint terms)
 {
-    
 	double summ = 0;
 	double sign = 1;
-    
 	for (int k = 0; k < terms; k++)
 	{
 		summ += sign / (2.0 * k + 1.0);
         sign = -sign;
 	}
-
+    
 	return 4.0*summ;
 }
 

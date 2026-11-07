@@ -1,12 +1,21 @@
-#include "pico/types.h"
+#pragma once
 
+#ifndef PROFILING_ENABLED
+#define PROFILING_ENABLED 1
+#endif
+
+#if PROFILING_ENABLED
+void profiling_start(uint32_t id);
+void profiling_stop(uint32_t id);
+#else
+// профилирование выключено: вызовы ничего не делают
+#define profiling_start(id) ((void)0)
+#define profiling_stop(id) ((void)0)
+#endif
 
 #define STOPWATCH_MAX_NUM 5 
 
 void profiling_stopwatch_init(uint32_t id, const char *name);
-
-void profiling_start(uint32_t id);
-void profiling_stop(uint32_t id);
 
 typedef struct {
 	uint64_t counts;
@@ -15,6 +24,4 @@ typedef struct {
 	const char *name;
 } profiling_result_t;
 
-
 bool profiling_get(uint32_t id, profiling_result_t *result);
-void profiling_reset(void);

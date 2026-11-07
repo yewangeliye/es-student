@@ -1,6 +1,10 @@
 #include "led-task.h"
 
 #include "pico/stdlib.h"
+#include "systime/systime.h"
+
+
+//#include "pico/stdlib.h"
 
 // Состояние задачи: внутреннее связывание, только для этого файла
 static led_state_t led_state;
@@ -8,10 +12,10 @@ static uint64_t half_period_us;
 static uint64_t last_toggle_us;
 static const uint32_t DEFAULT_LED_BLINK_PERIOD_MS=1000;
 
-
+/*
 static bool period_elapsed(uint64_t *last_us, uint64_t period_us)
 {
-    uint64_t now_us = time_us_64();
+    uint64_t now_us = systime_us_64();
 
     if (now_us - *last_us <= period_us) 
 	{
@@ -29,6 +33,7 @@ static bool period_elapsed(uint64_t *last_us, uint64_t period_us)
     return true;
 }
 
+*/
 // Вспомогательная функция
 static void led_set(bool on)
 {
@@ -96,7 +101,7 @@ void led_task_handle(void)
 			break;
 	    // «мигает» — каждые полпериода переключаем светодиод
 		case LED_STATE_BLINK:
-			if (period_elapsed(&last_toggle_us, half_period_us)) 
+			if (systime_period_elapsed(&last_toggle_us, half_period_us)) 
 			{
 				gpio_put(PICO_DEFAULT_LED_PIN, !gpio_get(PICO_DEFAULT_LED_PIN));
 			}
@@ -109,3 +114,24 @@ uint32_t led_task_get_period_ms(void)
 	return (uint32_t)(half_period_us / 500);
 }
 
+void led_task_next_state(void)
+{
+	 switch (led_state)
+    {	
+		case LED_STATE_OFF:
+		{
+			led_task_set_state(LED_STATE_ON);
+			break;
+		}
+		case LED_STATE_ON:
+		{
+			led_task_set_state(LED_STATE_BLINK);
+			break;
+		}
+		case LED_STATE_BLINK:
+		{
+			led_task_set_state(LED_STATE_OFF);
+			break;
+		}	
+    }
+}

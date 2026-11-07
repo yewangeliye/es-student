@@ -1,10 +1,12 @@
 #include "pi-task.h"
 
+#include "systime/systime.h"
+
 #include "pico/stdlib.h"
 
 #define PI_TERMS_PER_CALL 100
 
-
+// Состояние расчёта: должно пережить возврат из обработчика
 
 static pi_state_t pi_state;
 
@@ -36,9 +38,9 @@ bool pi_task_start(uint32_t n)
 			pi_k = 0;
 			pi_sum = 0.0;
 			pi_sign = 1.0;
-			pi_duration = 1; 
+			pi_duration = 1; //признак "работает"
 			pi_state = PI_STATE_RUNNING;
-			start_time = time_us_64();
+			start_time = systime_us();
 			return true;
 		}
 	}
@@ -56,7 +58,7 @@ void pi_task_handle(void)
 		}
 		case PI_STATE_RUNNING:
 		{
-			
+			// Очередная порция членов ряда, но не дальше последнего
 			int end = pi_k + PI_TERMS_PER_CALL;
 			if (end > pi_n) 
 			{
@@ -70,15 +72,15 @@ void pi_task_handle(void)
 			if (pi_k == pi_n) 
 			{
 				pi_result = 4.0 * pi_sum;
-				pi_duration =  (uint32_t)((time_us_64() - start_time) / 1000);
+				pi_duration =  (uint32_t)((systime_us() - start_time) / 1000);
 				pi_state = PI_STATE_READY;
-				
+
 			}
 		}
 	}
 }
 
-
+// Готов ли результат: если да, записать его по указателю
 bool pi_task_get_result(double *result, uint32_t *duration)
 {
     switch (pi_state)

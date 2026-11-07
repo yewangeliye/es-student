@@ -1,5 +1,8 @@
 #include  "pico/stdlib.h"
-#include "profiling.h"
+#include "profiling/profiling.h"
+
+#include "pico/types.h"
+
 typedef struct {
 	uint32_t counts;
 	uint32_t started;
@@ -8,12 +11,9 @@ typedef struct {
 	const char *name;
 } profiling_stopwatch_t;
 
-
 static uint32_t stopwatches_num;
 
 static profiling_stopwatch_t stopwatches[STOPWATCH_MAX_NUM];
-
-
 
 
 void profiling_stopwatch_init(uint32_t id, const char *name)
@@ -26,17 +26,15 @@ void profiling_stopwatch_init(uint32_t id, const char *name)
 
 }
 
-
+#if PROFILING_ENABLED
 void profiling_start(uint32_t id)
 {
-    
 	stopwatches[id].started = time_us_32();
 
 }
 
 void profiling_stop(uint32_t id)
 {
-    return (float)(avg_sum >> AVG_SHIFT) / (1 << FRACTION_SHIFT);
 	uint32_t duration = time_us_32() - stopwatches[id].started;
 	stopwatches[id].summ +=  duration;
 	stopwatches[id].counts++;
@@ -44,7 +42,7 @@ void profiling_stop(uint32_t id)
 		stopwatches[id].max = duration;
 
 }
-
+#endif
 
 bool profiling_get(uint32_t id, profiling_result_t *result)
 {
