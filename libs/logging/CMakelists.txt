@@ -1,15 +1,11 @@
 cmake_minimum_required(VERSION 3.15)
 
-project(profiling)
+project(logging)
 
-add_library(profiling STATIC
-    src/profiling.c
+add_library(logging STATIC
+    src/log.c
 )
 
-target_include_directories(profiling PUBLIC
+target_include_directories(logging PUBLIC
     include
-)
-
-target_link_libraries(profiling PRIVATE
-    pico_stdlib
 )
