@@ -4,6 +4,7 @@
 #include "pico/stdlib.h"
 #include "led-task/led-task.h"
 #include "button-task/button-task.h"
+#include "pi-task/pi-task.h"
 #include <string.h>
 #include <errno.h>
 #include <ctype.h>
@@ -11,7 +12,6 @@
 
 static void cmd_info(const command_t *command);
 static void cmd_uptime(const command_t *command);
-static void cmd_calc_pi(const command_t *command);
 static void cmd_main_time_exec(const command_t *command);
 static void cmd_main_time_reset(const command_t *command);
 static void cmd_led_enable(const command_t *command);
@@ -19,6 +19,8 @@ static void cmd_led_disable(const command_t *command);
 static void cmd_led_blink(const command_t *command);
 static void cmd_led_period(const command_t *command);
 static void cmd_button(const command_t *command);
+static void cmd_pi_start(const command_t *command);
+static void cmd_pi(const command_t *command);
 
 static bool parse_u32(const char *text, uint32_t *value);
 double calc_pi(uint terms);
@@ -31,7 +33,6 @@ volatile double pi_result;
 const api_command_t api_commands[] = {
     { "info", "device passport", cmd_info },
 	{ "uptime", "time since reset", cmd_uptime },
-	{ "calc_pi", "calculate pi: calc_pi [terms]", cmd_calc_pi },
 	{ "main_time_exec", "superloop iteration: average and maximum", cmd_main_time_exec },
 	{ "main_time_reset", "reset maximum iteration", cmd_main_time_reset },
 	{ "led_enable", "led_enable", cmd_led_enable },
@@ -39,14 +40,16 @@ const api_command_t api_commands[] = {
 	{ "led_blink", "led_blink", cmd_led_blink },
 	{ "led_period", "led_period <period_ms>", cmd_led_period },
 	{ "button", "button", cmd_button },
+	{ "pi_start", "calculate pi: pi_start [<terms>]", cmd_pi_start },
+	{ "pi", "returns pi: pi", cmd_pi },
 };
 
-const uint32_t api_command_count = sizeof(api_commands) / sizeof(api_commands[0]);
+const uint api_command_count = sizeof(api_commands) / sizeof(api_commands[0]);
 
 
 void cmd_info(const command_t *command)
 {
-    // печатаем паспорт устройства
+    
 	device_info();
 }
 
@@ -56,10 +59,10 @@ void cmd_uptime(const command_t *command)
 	printf("uptime: %llu ms\n", uptime);
 }	
 
-void cmd_calc_pi(const command_t *command)
+void cmd_pi_start(const command_t *command)
 {
-    uint64_t start_us = time_us_64();
 	uint32_t terms;
+	
     if (command->argc > 1 || !parse_u32(command->argv[0], &terms))
     {
         printf("error: usage calc_pi [terms]\n");
@@ -71,12 +74,30 @@ void cmd_calc_pi(const command_t *command)
         return;
     }
 
-	pi_result = calc_pi(CALC_PI_TERMS);
-    uint64_t spent_us = time_us_64() - start_us;
+	if (pi_task_start(terms))
+		printf("pi: started, %ld terms\n", terms);
+	else 
+		printf("error: pi is busy\n");
+   
+}
 
-
-    printf("pi: %.8f\n", pi_result);
-    printf("time: %llu ms\n", spent_us / 1000);
+void cmd_pi(const command_t *command)
+{	
+	double result;
+	uint32_t duration;
+	if (pi_task_get_result(&result, &duration))
+	{	
+		printf("pi: %.9f in %lu ms\n", result, duration);
+		return;
+	}
+	else if (!duration)
+    {
+        printf("pi: not started\n");
+        return;
+    }
+	else 
+		printf("pi: running\n");
+   
 }
 
 void cmd_main_time_exec(const command_t *command)
@@ -118,14 +139,14 @@ static void cmd_led_period(const command_t *command)
         return;
     }
 
-    // годится ли такой период, решает задача светодиода
+    
     if (!led_task_set_period_ms(period_ms))
     {
         printf("error: period_ms must be greater than 0\n");
         return;
     }
 
-    // ответ: состояние и период светодиода
+    
 	print_led_state();
 }
 
@@ -135,7 +156,7 @@ void cmd_button(const command_t *command)
 		printf("button: pressed, presses %llu\n", button_task_get_press_count());
 	else
 		printf("button: released, presses %llu\n", button_task_get_press_count());
-	
+
 	return;
 }
 
@@ -151,7 +172,7 @@ void api_handle(const command_t *command)
 		for (int i = 0; i < api_command_count; i++)
 			printf("%20s %30s\n", api_commands[i].name, api_commands[i].help);
 	}
-	else //not help
+	else 
 	{
 		for (uint32_t i = 0; i < api_command_count; i++)
 		{
@@ -165,11 +186,10 @@ void api_handle(const command_t *command)
 	}
 }
 
-// Число без знака из десятичной записи. false — в записи не только цифры
-// или число не помещается в uint32_t.
+
 static bool parse_u32(const char *text, uint32_t *value)
 {
-    // strtoul приняла бы и знак: из "-1" получилось бы 4294967295
+    
     if (!isdigit((unsigned char)text[0]))
     {
         return false;
@@ -179,7 +199,7 @@ static bool parse_u32(const char *text, uint32_t *value)
     errno = 0;
     unsigned long number = strtoul(text, &end, 10);
 
-    // после числа остались символы или число не поместилось
+    
     if (*end != '\0' || errno == ERANGE || number > UINT32_MAX)
     {
         return false;
@@ -191,16 +211,16 @@ static bool parse_u32(const char *text, uint32_t *value)
 
 double calc_pi(uint terms)
 {
-    // сумма ряда и знак очередного члена, оба double
+    
 	double summ = 0;
 	double sign = 1;
-    // для k от 0 до terms: прибавить к сумме sign / (2k + 1) и сменить знак
+    
 	for (int k = 0; k < terms; k++)
 	{
 		summ += sign / (2.0 * k + 1.0);
         sign = -sign;
 	}
-    // вернуть сумму, умноженную на 4
+    
 	return 4.0*summ;
 }
 
