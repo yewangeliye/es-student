@@ -25,3 +25,4 @@ typedef struct {
 } profiling_result_t;
 
 bool profiling_get(uint32_t id, profiling_result_t *result);
+void profiling_reset(void);
