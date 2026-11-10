@@ -1,6 +1,7 @@
 #include  "pico/stdlib.h"
 #include "profiling/profiling.h"
 
+#include "pico/types.h"
 
 typedef struct {
 	uint32_t counts;
@@ -43,7 +44,6 @@ void profiling_stop(uint32_t id)
 		stopwatches[id].max = duration;
 
 }
-
 #endif
 
 bool profiling_get(uint32_t id, profiling_result_t *result)

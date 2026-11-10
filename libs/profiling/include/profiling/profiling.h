@@ -1,7 +1,5 @@
 #pragma once
 
-#include "pico/types.h"
-
 
 #ifndef PROFILING_ENABLED
 #define PROFILING_ENABLED 1
