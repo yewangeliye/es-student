@@ -12,7 +12,7 @@ pico_sdk_init()
 add_compile_options(-Wall)
 
 # libs лежит вне папки проекта: второй аргумент задаёт каталог сборки
-add_subdirectory(../libs ${CMAKE_BINARY_DIR}/libs)
+add_subdirectory(${CMAKE_BINARY_DIR}/libs)
 
 # выключатель профилирования: 0 — вызовов секундомеров в образе нет
 target_compile_definitions(profiling PUBLIC
