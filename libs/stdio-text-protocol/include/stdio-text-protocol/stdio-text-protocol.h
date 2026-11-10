@@ -21,6 +21,7 @@ typedef struct
 } command_t;
 
 void stdio_text_protocol_init(void);
+const command_t *stdio_text_protocol_handle(void);
 
 // Читает один символ, не ожидая его. Когда строка закончена, возвращает
 // команду, иначе NULL. Команда действительна до следующего вызова.
