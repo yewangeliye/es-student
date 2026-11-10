@@ -6,6 +6,7 @@
 #endif
 
 #if PROFILING_ENABLED
+void profiling_reset(void);
 void profiling_start(uint32_t id);
 void profiling_stop(uint32_t id);
 #else
