@@ -1,3 +1,4 @@
+#pragma once
 #define FIRMWARE_NAME "template"
 #define FIRMWARE_VERSION "1.0.0"
 
