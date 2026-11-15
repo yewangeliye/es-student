@@ -1,23 +1,24 @@
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <errno.h>
-#include <ctype.h>
 
-#include "pico/stdlib.h"
+#include "api-commands.h"
+
+
+#include "firmware.h"
+
+#include "led-task/led-task.h"
+#include "button-task/button-task.h"
+#include "pi-task/pi-task.h"
 
 #include "profiling/profiling.h"
 #include "systime/systime.h"
 #include "device/device.h"
 #include "logging/log.h"
 
-#include "led-task/led-task.h"
-#include "button-task/button-task.h"
-#include "pi-task/pi-task.h"
 
-#include "firmware.h"
-#include "api.h"
+#include <string.h>
+#include <errno.h>
+#include <ctype.h>
 
+const uint CALC_PI_TERMS = 1000000; //!
 
 static void cmd_info(const command_t *command);
 static void cmd_uptime(const command_t *command);
@@ -31,13 +32,7 @@ static void cmd_button(const command_t *command);
 static void cmd_pi_start(const command_t *command);
 static void cmd_pi(const command_t *command);
 
-static bool parse_u32(const char *text, uint32_t *value);
-double calc_pi(uint terms);
-void print_led_state(void);
 
-const uint CALC_PI_TERMS = 1000000;
-
-volatile double pi_result;
 
 const api_command_t api_commands[] = {
     { "info", "device passport", cmd_info },
@@ -55,167 +50,11 @@ const api_command_t api_commands[] = {
 
 const uint api_command_count = sizeof(api_commands) / sizeof(api_commands[0]);
 
-
-void cmd_info(const command_t *command)
-{
-    device_info_t info;
-	device_get_info(&info);
-	printf("name: %s\n", FIRMWARE_NAME);
-	printf("version: %s\n", FIRMWARE_VERSION);
-	printf("project: %s\n", FIRMWARE_PROJECT);
-    printf("repo: %s\n", FIRMWARE_REPO);
-    printf("board: %s\n", info.board_type);//!
-    printf("serial: %s\n", info.board_id);
-    printf("chip: manufacturer 0x%03lx, part 0x%04lx, revision %lu\n", info.manufacturer, info.part, info.revision);
-	printf("pico-sdk: %s\n", PICO_SDK_VERSION_STRING);
-}
-
-void cmd_uptime(const command_t *command)
-{
-	uint64_t uptime = systime_ms();
-	printf("uptime: %llu ms\n", uptime);
-}	
-
-void cmd_pi_start(const command_t *command)
-{
-	uint32_t terms;
-
-    if (command->argc > 1 || !parse_u32(command->argv[0], &terms))
-    {
-        printf("error: usage pi_start [terms]\n");
-        return;
-    }
-	if (!terms)
-    {
-        printf("error: terms must be greater than 0\n");
-        return;
-    }
-
-	if (pi_task_start(terms))
-		printf("pi: started, %ld terms\n", terms);
-	else 
-		printf("error: pi is busy\n");
-
-}
-
-void cmd_pi(const command_t *command)
-{	
-	double result;
-	uint32_t duration;
-	if (pi_task_get_result(&result, &duration))
-	{	
-		printf("pi: %.9f in %lu ms\n", result, duration);
-		return;
-	}
-	else if (!duration)
-    {
-        printf("pi: not started\n");
-        return;
-    }
-	else 
-		printf("pi: running\n");
-
-}
-
-void cmd_profiling(const command_t *command)
-{
-	#if PROFILING_ENABLED
-	uint32_t id = 0;
-	profiling_result_t result;
-	while (profiling_get(id, &result))
-	{	
-		printf("%10s count %10llu mean %.2f us max %lu us\n", 
-				result.name, result.counts, result.mean, result.max);
-		id++;
-	}
-	#else
-	
-	printf("profiling is disabled in this build\n");
-	#endif
-}
-
-void cmd_profiling_reset(const command_t *command)
-{
-	profiling_reset();
-	printf("profiling reset\n");
-}
-
-void cmd_led_enable(const command_t *command)
-{
-	led_task_set_state(LED_STATE_ON);
-	print_led_state();
-}
-
-void cmd_led_disable(const command_t *command)
-{
-	led_task_set_state(LED_STATE_OFF);
-	print_led_state();
-}
-
-void cmd_led_blink(const command_t *command)
-{
-	led_task_set_state(LED_STATE_BLINK);
-	print_led_state();
-}
-
-static void cmd_led_period(const command_t *command)
-{
-    uint32_t period_ms;
-
-    if (command->argc != 1 || !parse_u32(command->argv[0], &period_ms))
-    {
-        printf("error: usage led_period <period_ms>\n");
-        return;
-    }
-
-    if (!led_task_set_period_ms(period_ms))
-    {
-        printf("error: period_ms must be greater than 0\n");
-        return;
-    }
-
-	print_led_state();
-}
-
-void cmd_button(const command_t *command)
-{
-	if (button_task_is_pressed())
-		printf("button: pressed, presses %llu\n", button_task_get_press_count());
-	else
-		printf("button: released, presses %llu\n", button_task_get_press_count());
-
-	return;
-}
-
-
-void api_handle(const command_t *command)
-{	
-	if (command->truncated)
-		LOG_ERR("error: command longer than 63 characters or 4 arguments\n");		
-	else 
-	if (strcmp(command->name, "help") == 0)
-	{	
-		printf("%20s %30s\n", "help", "list of commands");
-		for (int i = 0; i < api_command_count; i++)
-			printf("%20s %30s\n", api_commands[i].name, api_commands[i].help);
-	}
-	else 
-	{
-		for (uint32_t i = 0; i < api_command_count; i++)
-		{
-			if (strcmp(command->name, api_commands[i].name) == 0)
-			{
-				api_commands[i].callback(command);
-				return;
-			}
-		}
-		printf("error: unknown command '%s', try help\n", command->name);
-	}
-}
-
-
+// Число без знака из десятичной записи. false — в записи не только цифры
+// или число не помещается в uint32_t.
 static bool parse_u32(const char *text, uint32_t *value)
 {
+    // strtoul приняла бы и знак: из "-1" получилось бы 4294967295
     if (!isdigit((unsigned char)text[0]))
     {
         return false;
@@ -225,7 +64,7 @@ static bool parse_u32(const char *text, uint32_t *value)
     errno = 0;
     unsigned long number = strtoul(text, &end, 10);
 
-
+    // после числа остались символы или число не поместилось
     if (*end != '\0' || errno == ERANGE || number > UINT32_MAX)
     {
         return false;
@@ -235,18 +74,6 @@ static bool parse_u32(const char *text, uint32_t *value)
     return true;
 }
 
-double calc_pi(uint terms)
-{
-	double summ = 0;
-	double sign = 1;
-	for (int k = 0; k < terms; k++)
-	{
-		summ += sign / (2.0 * k + 1.0);
-        sign = -sign;
-	}
-    
-	return 4.0*summ;
-}
 
 void print_led_state(void)
 {
@@ -269,6 +96,151 @@ void print_led_state(void)
 			break;
 		}
 	}
+	
+	return;
+}
+
+
+
+static void cmd_info(const command_t *command)
+{
+    device_info_t info;
+	device_get_info(&info);
+	// печатаем паспорт устройства
+	printf("name: %s\n", FIRMWARE_NAME);
+	printf("version: %s\n", FIRMWARE_VERSION);
+	// печатаем пять строк паспорта
+	printf("project: %s\n", FIRMWARE_PROJECT);
+    printf("repo: %s\n", FIRMWARE_REPO);
+    printf("board: %s\n", info.board_type);//!
+    printf("serial: %s\n", info.board_id);
+    printf("chip: manufacturer 0x%03lx, part 0x%04lx, revision %lu\n", info.manufacturer, info.part, info.revision);
+	printf("pico-sdk: %s\n", info.SDK_version);
+}
+
+
+static void cmd_uptime(const command_t *command)
+{
+	uint64_t uptime = systime_ms();
+	printf("uptime: %llu ms\n", uptime);
+}
+static void cmd_pi_start(const command_t *command)
+{
+	uint32_t terms;
+
+    if (command->argc > 1 || !parse_u32(command->argv[0], &terms))
+    {
+        printf("error: usage pi_start [terms]\n");
+        return;
+    }
+	if (!terms)
+    {
+        printf("error: terms must be greater than 0\n");
+        return;
+    }
+
+	if (pi_task_start(terms))
+		printf("pi: started, %ld terms\n", terms);
+	else 
+		printf("error: pi is busy\n");
+
+}
+
+
+static void cmd_pi(const command_t *command)
+{	
+	double result;
+	uint32_t duration;
+	if (pi_task_get_result(&result, &duration))
+	{	
+		printf("pi: %.9f in %lu ms\n", result, duration);
+		return;
+	}
+	else if (!duration)
+    {
+        printf("pi: not started\n");
+        return;
+    }
+	else 
+		printf("pi: running\n");
+
+}
+
+
+static void cmd_profiling(const command_t *command)
+{
+	#if PROFILING_ENABLED
+	uint32_t id = 0;
+	profiling_result_t result;
+	while (profiling_get(id, &result))
+	{	
+		printf("%10s count %10llu mean %.2f us max %lu us\n", 
+				result.name, result.counts, result.mean, result.max);
+		id++;
+	}
+	#else
+	// профилирование выключено: вызовы ничего не делают
+	printf("profiling is disabled in this build\n");
+	#endif
+}
+
+
+static void cmd_profiling_reset(const command_t *command)
+{
+	profiling_reset();
+	printf("profiling reset\n");
+}
+
+
+static void cmd_led_enable(const command_t *command)
+{
+	led_task_set_state(LED_STATE_ON);
+	print_led_state();
+}
+
+
+static void cmd_led_disable(const command_t *command)
+{
+	led_task_set_state(LED_STATE_OFF);
+	print_led_state();
+}
+
+
+static void cmd_led_blink(const command_t *command)
+{
+	led_task_set_state(LED_STATE_BLINK);
+	print_led_state();
+}
+
+static void cmd_led_period(const command_t *command)
+{
+    uint32_t period_ms;
+
+    if (command->argc != 1 || !parse_u32(command->argv[0], &period_ms))
+    {
+        printf("error: usage led_period <period_ms>\n");
+        return;
+    }
+
+    // годится ли такой период, решает задача светодиода
+    if (!led_task_set_period_ms(period_ms))
+    {
+        printf("error: period_ms must be greater than 0\n");
+        return;
+    }
+
+    // ответ: состояние и период светодиода
+	print_led_state();
+}
+
+static void cmd_button(const command_t *command)
+{
+	if (button_task_is_pressed())
+		printf("button: pressed, presses %llu\n", button_task_get_press_count());
+	else
+		printf("button: released, presses %llu\n", button_task_get_press_count());
 
 	return;
 }
+
+

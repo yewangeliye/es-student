@@ -4,6 +4,8 @@
 #include "pico/stdlib.h"
 #include "logging/log.h"
 
+#define LINE_SIZE 32
+
 static command_t command;
 
 char line [STDIO_TEXT_PROTOCOL_LINE_SIZE];
