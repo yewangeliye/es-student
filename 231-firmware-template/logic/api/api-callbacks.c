@@ -82,7 +82,7 @@ static void print_led_state(void)
 	{
 		case LED_STATE_OFF:
 		{
-			printf("led: false, period %lu ms\n", led_task_get_period_ms());
+			printf("led: off, period %lu ms\n", led_task_get_period_ms());
 			break;
 		}
 		case LED_STATE_ON:
@@ -128,24 +128,24 @@ static void cmd_pi_start(const command_t *command)
 {
 	uint32_t terms;
 
-    if (command->argc > 1 || !parse_u32(command->argv[0], &terms))
-    {
-        printf("error: usage pi_start [terms]\n");
-        return;
-    }
-	if (!terms)
-    {
-        printf("error: terms must be greater than 0\n");
-        return;
-    }
-
-	if (pi_task_start(terms))
-		printf("pi: started, %ld terms\n", terms);
-	else 
-		printf("error: pi is busy\n");
-
+    if (command->argc == 0)
+	{
+		terms = pi_task_get_def_terms_num();
+	}
+	else
+	{		
+		if (command->argc > 1 || !parse_u32(command->argv[0], &terms))
+		{
+			printf("error: usage pi_start [terms]\n");
+			return;
+		}
+		if (!terms)
+		{
+			printf("error: terms must be greater than 0\n");
+			return;
+		}
+	}	 
 }
-
 
 static void cmd_pi(const command_t *command)
 {	
@@ -174,7 +174,7 @@ static void cmd_profiling(const command_t *command)
 	profiling_result_t result;
 	while (profiling_get(id, &result))
 	{	
-		printf("%10s count %10llu mean %.2f us max %lu us\n", 
+		printf("%s count %llu mean %.2f us max %lu us\n", 
 				result.name, result.counts, result.mean, result.max);
 		id++;
 	}
