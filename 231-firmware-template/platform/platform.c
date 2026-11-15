@@ -3,14 +3,26 @@
 #include "pico/stdlib.h"
 #include "hardware/gpio.h"
 
-static const uint BUTTON_PIN = 15;
+static const uint STATE_BUTTON_PIN = 15;
+static const uint PERIOD_BUTTON_PIN = 14;
 
-static void button_init(void)
+const platform_button_t buttons[] = {
+    {0,STATE_BUTTON_PIN },
+	{1,PERIOD_BUTTON_PIN },
+};
+
+const uint32_t buttons_count = sizeof(buttons) / sizeof(buttons[0]);
+
+static void buttons_init(void)
 {
-	gpio_init(BUTTON_PIN);
-    gpio_set_dir(BUTTON_PIN, GPIO_IN);
-    gpio_pull_up(BUTTON_PIN);
 	
+	gpio_init(STATE_BUTTON_PIN);
+    gpio_set_dir(STATE_BUTTON_PIN, GPIO_IN);
+    gpio_pull_up(STATE_BUTTON_PIN);
+	
+	gpio_init(PERIOD_BUTTON_PIN);
+    gpio_set_dir(PERIOD_BUTTON_PIN, GPIO_IN);
+    gpio_pull_up(PERIOD_BUTTON_PIN);
 }
 
 static void led_init(void)
@@ -25,7 +37,7 @@ static void led_init(void)
 void platform_init(void)
 {
 	stdio_init_all();
-	button_init();
+	buttons_init();
 	led_init();
 	
 }
@@ -44,9 +56,9 @@ bool platform_led_get(void)
 }
 
 // нажата ли кнопка сейчас, без подавления дребезга
-bool platform_button_read(void)
+bool platform_button_read(uint32_t button_id) 
 {
-	if (!gpio_get(BUTTON_PIN)) 
+	if (!gpio_get(STATE_BUTTON_PIN)) 
 		return true;
 	else 
 		return false;

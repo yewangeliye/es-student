@@ -4,3 +4,4 @@
 
 #define FIRMWARE_PROJECT "231-firmware-template"
 #define FIRMWARE_REPO "https://github.com/yewangeliye/es-student"
+//

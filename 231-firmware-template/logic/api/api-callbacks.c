@@ -1,6 +1,4 @@
-
 #include "api-commands.h"
-
 
 #include "firmware.h"
 
@@ -13,12 +11,9 @@
 #include "device/device.h"
 #include "logging/log.h"
 
-
 #include <string.h>
 #include <errno.h>
 #include <ctype.h>
-
-
 
 static void cmd_info(const command_t *command);
 static void cmd_uptime(const command_t *command);
@@ -31,7 +26,6 @@ static void cmd_led_period(const command_t *command);
 static void cmd_button(const command_t *command);
 static void cmd_pi_start(const command_t *command);
 static void cmd_pi(const command_t *command);
-
 
 
 const api_command_t api_commands[] = {
@@ -101,7 +95,6 @@ static void print_led_state(void)
 }
 
 
-
 static void cmd_info(const command_t *command)
 {
     device_info_t info;
@@ -118,17 +111,16 @@ static void cmd_info(const command_t *command)
 	printf("pico-sdk: %s\n", info.SDK_version);
 }
 
-
 static void cmd_uptime(const command_t *command)
 {
 	uint64_t uptime = systime_ms();
 	printf("uptime: %llu ms\n", uptime);
 }
+
 static void cmd_pi_start(const command_t *command)
 {
 	uint32_t terms;
-
-    if (command->argc == 0)
+	if (command->argc == 0)
 	{
 		terms = pi_task_get_def_terms_num();
 	}
@@ -145,6 +137,12 @@ static void cmd_pi_start(const command_t *command)
 			return;
 		}
 	}	 
+	
+	if (pi_task_start(terms))
+		printf("pi: started, %ld terms\n", terms);
+	else 
+		printf("error: pi is busy\n");
+   
 }
 
 static void cmd_pi(const command_t *command)
@@ -163,9 +161,8 @@ static void cmd_pi(const command_t *command)
     }
 	else 
 		printf("pi: running\n");
-
+   
 }
-
 
 static void cmd_profiling(const command_t *command)
 {
@@ -184,13 +181,11 @@ static void cmd_profiling(const command_t *command)
 	#endif
 }
 
-
 static void cmd_profiling_reset(const command_t *command)
 {
 	profiling_reset();
 	printf("profiling reset\n");
 }
-
 
 static void cmd_led_enable(const command_t *command)
 {
@@ -198,13 +193,11 @@ static void cmd_led_enable(const command_t *command)
 	print_led_state();
 }
 
-
 static void cmd_led_disable(const command_t *command)
 {
 	led_task_set_state(LED_STATE_OFF);
 	print_led_state();
 }
-
 
 static void cmd_led_blink(const command_t *command)
 {
@@ -235,12 +228,18 @@ static void cmd_led_period(const command_t *command)
 
 static void cmd_button(const command_t *command)
 {
-	if (button_task_is_pressed())
-		printf("button: pressed, presses %llu\n", button_task_get_press_count());
-	else
-		printf("button: released, presses %llu\n", button_task_get_press_count());
+	uint32_t id = 0;
+	button_info_t info;
+	while (button_task_get_info(id, &info))
+	{	
+		char *state; //max string length
+		if (info.state) state = "pressed";
+		else state = "released";
+		
+		printf("button %lu: %s, presses %llu\n", 
+				(id + 1), state, info.presses);
+		id++;
+	}
 
 	return;
 }
-
-

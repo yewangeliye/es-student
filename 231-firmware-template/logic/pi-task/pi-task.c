@@ -1,9 +1,10 @@
 #include "pi-task/pi-task.h"
-#include "systime/systime.h"
 
+#include "systime/systime.h"
 
 #define PI_TERMS_PER_CALL 100
 #define PI_TERMS_DEFAULT_NUM 1000000
+
 
 // Состояние расчёта: должно пережить возврат из обработчика
 
@@ -20,6 +21,7 @@ static uint32_t pi_duration;
 void pi_task_init(void)
 {
 	pi_state = PI_STATE_OFF;
+	
 }
 
 bool pi_task_start(uint32_t n)
@@ -75,7 +77,7 @@ void pi_task_handle(void)
 				pi_result = 4.0 * pi_sum;
 				pi_duration =  (uint32_t)((systime_us() - start_time) / 1000);
 				pi_state = PI_STATE_READY;
-
+				
 			}
 		}
 	}
@@ -105,6 +107,7 @@ bool pi_task_get_result(double *result, uint32_t *duration)
 	}
 	return false;
 }
+
 uint32_t pi_task_get_def_terms_num()
 {
 	return PI_TERMS_DEFAULT_NUM;

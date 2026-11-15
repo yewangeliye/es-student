@@ -1,10 +1,7 @@
-
 #include "led-task/led-task.h"
-
 
 #include "platform/platform.h"
 #include "systime/systime.h"
-
 
 
 
@@ -14,15 +11,25 @@ static uint64_t half_period_us;
 static uint64_t last_toggle_us;
 static const uint32_t DEFAULT_LED_BLINK_PERIOD_MS=1000;
 
-static void led_set(bool on);
+typedef enum {
+    LED_PERIOD_250,
+    LED_PERIOD_500,
+    LED_PERIOD_1000,
+} led_period_t;
+
+static led_period_t led_period;
+
 void led_task_init(void)
 {
 	led_task_set_period_ms(DEFAULT_LED_BLINK_PERIOD_MS);
     led_task_set_state(LED_STATE_BLINK);
+	led_period = LED_PERIOD_1000;
 }
 
 bool led_task_set_period_ms(uint32_t period_ms)
 {
+    // С нулевым полупериодом светодиод переключался бы
+    // на каждой итерации: такой период не принимается
     if (period_ms == 0) {
         return false;
     }
@@ -31,8 +38,28 @@ bool led_task_set_period_ms(uint32_t period_ms)
     return true;
 }
 
-
-
+void led_task_set_next_period() //TODO
+{
+   switch (led_period)
+	{
+		case LED_PERIOD_250:
+		{
+			led_task_set_period_ms(500);
+			
+			break;
+		}
+		case LED_PERIOD_500:
+		{
+			led_task_set_period_ms(1000);
+			break;
+		}
+		case LED_PERIOD_1000:
+		{
+			led_task_set_period_ms(250);
+			break;
+		}
+}
+}
 void led_task_set_state(led_state_t state)
 {
     led_state = state;
@@ -40,13 +67,11 @@ void led_task_set_state(led_state_t state)
 	{
 		case LED_STATE_OFF:
 		{
-			
 			platform_led_set(false);
 			break;
 		}
 		case LED_STATE_ON:
 		{
-			
 			platform_led_set(true);
 			break;
 		}
@@ -56,7 +81,7 @@ void led_task_set_state(led_state_t state)
 			break;
 		}
 
-
+		
 	//	gpio_put(LED_PIN, led_state);
 	}
 }
@@ -77,7 +102,6 @@ void led_task_handle(void)
 		case LED_STATE_BLINK:
 			if (systime_period_elapsed(&last_toggle_us, half_period_us)) 
 			{
-				
 				platform_led_set(!platform_led_get());
 			}
 			break;
