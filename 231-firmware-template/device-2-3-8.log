@@ -1,0 +1,128 @@
+задание: 2.3.8
+проект: 231-firmware-template
+устройство: 2e8a:000a
+серийный номер: 530328474890539C
+порт: COM3
+начало: 2026-11-15T15:06:18
+   0.001 --> 
+   0.561 --> help
+   0.562 <-- help
+   0.562 <-- help               list of commands
+   0.562 <-- info                device passport
+   0.562 <-- uptime               time since reset
+   0.562 <-- calc_pi  calculate pi: calc_pi [terms]
+   0.563 <-- main_time_exec superloop iteration: average and maximum
+   0.563 <-- main_time_reset        reset maximum iteration
+   0.563 <-- led_enable                     led_enable
+   0.563 <-- led_disable                    led_disable
+   0.563 <-- led_blink                      led_blink
+   0.623 <-- led_period         led_period <period_ms>
+   0.624 <-- button                         button
+   1.565 --> info
+   1.627 <-- info
+   1.628 <-- name: template
+   1.628 <-- version: 1.0.0
+   1.628 <-- project: 231-firmware-template
+   1.628 <-- repo: https://github.com/Clair-G/es-student
+   1.628 <-- board: pico
+   1.628 <-- serial: 530328474890539C
+   1.628 <-- chip: manufacturer 0x927, part 0x0002, revision 7
+   1.628 <-- pico-sdk: 2.3.0
+   2.624 --> uptime
+   2.686 <-- uptime
+   2.686 <-- uptime: 87662 ms
+   3.684 -->    uptime    
+   3.747 <-- uptime
+   3.747 <-- error: unknown command '', try help
+   4.688 --> upx<BS>time
+   4.750 <-- upx<BS> <BS>time
+   4.750 <-- uptime: 89727 ms
+   5.752 --> xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+   5.812 <-- xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+   5.812 <-- err api_handle:146 error: command longer than 63 characters or 4 arguments
+   6.810 --> led_period 1 2 3 4 5
+   6.871 <-- led_period 1 2 3 4 5
+   6.872 <-- err api_handle:146 error: command longer than 63 characters or 4 arguments
+   7.811 --> blink
+   7.871 <-- blink
+   7.872 <-- error: unknown command 'blink', try help
+   8.871 --> led_enable
+   8.932 <-- led_enable
+   8.933 <-- led: on, period 1000 ms
+   9.930 --> led_disable
+   9.993 <-- led_disable
+   9.993 <-- led: false, period 1000 ms
+  10.988 --> led_period 2000
+  11.050 <-- led_period 2000
+  11.050 <-- led: false, period 2000 ms
+  12.048 --> led_blink
+  12.110 <-- led_blink
+  12.111 <-- led: blink, period 2000 ms
+  13.049 --> led_period
+  13.111 <-- led_period
+  13.111 <-- error: usage led_period <period_ms>
+  14.106 --> led_period 5x
+  14.168 <-- led_period 5x
+  14.168 <-- error: usage led_period <period_ms>
+  15.109 --> led_period -1
+  15.172 <-- led_period -1
+  15.172 <-- error: usage led_period <period_ms>
+  16.109 --> led_period 4294967296
+  16.172 <-- led_period 4294967296
+  16.172 <-- error: usage led_period <period_ms>
+  17.110 --> led_period 0
+  17.173 <-- led_period 0
+  17.173 <-- error: period_ms must be greater than 0
+  18.170 --> led_period 1000
+  18.233 <-- led_period 1000
+  18.233 <-- led: blink, period 1000 ms
+  19.173 --> button
+  19.235 <-- button
+  19.235 <-- button: released, presses 0
+  20.177 --> pi
+  20.239 <-- pi
+  20.239 <-- error: unknown command 'pi', try help
+  21.180 --> pi_start 0
+  21.242 <-- pi_start 0
+  21.243 <-- error: unknown command 'pi_start', try help
+  22.239 --> pi_start 5x
+  22.301 <-- pi_start 5x
+  22.302 <-- error: unknown command 'pi_start', try help
+  23.301 --> pi_start 10 20
+  23.362 <-- pi_start 10 20
+  23.362 <-- error: unknown command 'pi_start', try help
+  24.361 --> profiling_reset
+  24.424 <-- profiling_reset
+  24.425 <-- error: unknown command 'profiling_reset', try help
+  25.423 --> pi_start
+  25.484 <-- pi_start
+  25.484 <-- error: unknown command 'pi_start', try help
+  25.982 --> pi
+  26.044 <-- pi
+  26.045 <-- error: unknown command 'pi', try help
+  26.543 --> pi_start 1000
+  26.607 <-- pi_start 1000
+  26.607 <-- error: unknown command 'pi_start', try help
+  27.045 --> uptime
+  27.108 <-- uptime
+  27.108 <-- uptime: 112084 ms
+  27.608 --> p
+  33.667 --> i
+  33.729 <-- pi
+  33.729 <-- error: unknown command 'pi', try help
+  34.721 --> profiling
+  34.782 <-- profiling
+  34.783 <-- error: unknown command 'profiling', try help
+  35.783 --> pi_start 100000
+  35.845 <-- pi_start 100000
+  35.845 <-- error: unknown command 'pi_start', try help
+  36.842 --> pi
+  36.903 <-- pi
+  36.903 <-- error: unknown command 'pi', try help
+  37.843 --> profiling_reset
+  37.906 <-- profiling_reset
+  37.906 <-- error: unknown command 'profiling_reset', try help
+  38.844 --> profiling
+  38.906 <-- profiling
+  38.906 <-- error: unknown command 'profiling', try help
+итог: отправлено кадров 36, принято строк 85
