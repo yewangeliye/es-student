@@ -29,3 +29,4 @@ typedef struct {
 
 // false — секундомер с таким номером не заведён
 bool profiling_get(uint32_t id, profiling_result_t *result);
+void profiling_reset(void);
