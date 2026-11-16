@@ -3,8 +3,8 @@
 #include "pico/stdlib.h"
 #include "hardware/gpio.h"
 
-static const uint STATE_BUTTON_PIN = 15;
-static const uint PERIOD_BUTTON_PIN = 14;
+#define STATE_BUTTON_PIN 15
+#define PERIOD_BUTTON_PIN 14
 
 const platform_button_t buttons[] = {
     { STATE_BUTTON_PIN },
