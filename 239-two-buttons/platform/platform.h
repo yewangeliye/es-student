@@ -16,6 +16,5 @@ bool platform_button_read(uint32_t button_id);
 
 
 typedef struct {
-	uint32_t id;
 	uint32_t pin;	
 } platform_button_t;
