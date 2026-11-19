@@ -2,19 +2,16 @@
 #include "pico/stdlib.h"
 
 #define LED_PIN 25
-#define BUTTON_1_PIN 15
+#define BUTTON_1_PIN 10
 #define BUTTON_2_PIN 14
 
-static const uint32_t button_pins[PLATFORM_BUTTON_COUNT] = {
-    [PLATFORM_BUTTON_1] = BUTTON_1_PIN,
-    [PLATFORM_BUTTON_2] = BUTTON_2_PIN,
-};
+static const uint32_t button_pins[2] = {BUTTON_1_PIN, BUTTON_2_PIN};
 
 void platform_init(void)
 {
     stdio_init_all();
 
-    for (uint32_t i = 0; i < PLATFORM_BUTTON_COUNT; i++)
+    for (uint32_t i = 0; i < 2; i++)
     {
         gpio_init(button_pins[i]);
         gpio_set_dir(button_pins[i], GPIO_IN);
@@ -36,9 +33,9 @@ bool platform_led_get(void)
     return !gpio_get(LED_PIN);
 }
 
-bool platform_button_read(platform_button_t btn)
+bool platform_button_read(uint32_t btn)
 {
-    if (btn >= PLATFORM_BUTTON_COUNT)
+    if (btn >= 2)
     {
         return false;
     }
