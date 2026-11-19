@@ -23,3 +23,4 @@ typedef struct {
 
 
 float platform_voltage_read(void);
+float platform_temp_read(void);
