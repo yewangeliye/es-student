@@ -1,20 +1,35 @@
-#include "platform/platform.h"
+#include "platform.h"
 #include "pico/stdlib.h"
-static const uint LED_PIN=25;
-static const uint BUTTON_PIN=15;
-static const uint SECOND_BUTTON_PIN=14;
+
+#define LED_PIN 25
+#define BUTTON_PIN 10
+
+const uint32_t button_pin[] = {10, 9};
+
 void platform_init(void)
 {
     stdio_init_all();
-    gpio_init(LED_PIN);
-    gpio_set_dir(LED_PIN, GPIO_OUT);
-    gpio_put(LED_PIN, false);
+
     gpio_init(BUTTON_PIN);
     gpio_set_dir(BUTTON_PIN, GPIO_IN);
     gpio_pull_up(BUTTON_PIN);
-    gpio_init(SECOND_BUTTON_PIN);
-    gpio_set_dir(SECOND_BUTTON_PIN, GPIO_IN);
-    gpio_pull_up(SECOND_BUTTON_PIN);
+
+    gpio_init(LED_PIN);
+    gpio_set_dir(LED_PIN, GPIO_OUT);
+    platform_led_set(true);
 }
-void platform_led_set(bool on) { gpio_put(LED_PIN, on); }
-bool platform_button_read(unsigned number) { return number<2 && !gpio_get(number ? SECOND_BUTTON_PIN : BUTTON_PIN); }
+
+void platform_led_set(bool on)
+{
+    gpio_put(LED_PIN, on);
+}
+
+bool platform_led_get(void)
+{
+    return !gpio_get(LED_PIN);
+}
+
+bool platform_button_read(uint32_t btn)
+{
+    return !gpio_get(button_pin[btn]);
+}
