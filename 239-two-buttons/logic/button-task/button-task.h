@@ -5,7 +5,7 @@
 
 typedef void (*button_task_callback_t)(void);
 
-void button_task_init(uint32_t button_id, button_task_callback_t on_press);
+void button_task_init(uint32_t button_id, button_task_callback_t on_press,button_task_callback_t on_long_press);
 
 void button_task_handle(void);
 uint64_t button_task_get_press_count(void);

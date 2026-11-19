@@ -43,8 +43,9 @@ int main()
 	stdio_text_protocol_init();
 	led_task_init();
 
-	button_task_init(BUTTON_STATE, led_task_next_state);
-	button_task_init(BUTTON_PERIOD, led_task_set_next_period);
+	
+	button_task_init(BUTTON_STATE, led_task_next_state, led_task_blink);
+	button_task_init(BUTTON_PERIOD, led_task_set_next_period, NULL);
 	
 
 	pi_task_init();
@@ -86,3 +87,4 @@ int main()
 
 		profiling_stop(STOPWATCH_LOOP);
     }
+}

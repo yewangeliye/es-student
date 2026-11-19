@@ -21,19 +21,24 @@ typedef enum {
 
 typedef struct {
 	uint64_t presses;	
-	button_state_t state;
 	uint64_t last_pressed_us;
+	uint64_t press_started_us;
+	button_state_t state;
 	button_task_callback_t on_press_cb;
+	button_task_callback_t on_long_press_cb;
+	bool long_press_enabled;
+	bool reported;
 } button_t;
 
 static button_t buttons[MAX_BUTTONS_NUMBER]; //кол-во кнопок - берем из платформы
 
 static const uint64_t DEBOUNCE_US = 20000;
+static const uint64_t LONG_PRESS_US = 1000000;
 
 
 
 
-void button_task_init(uint32_t button_id, button_task_callback_t on_press)
+void button_task_init(uint32_t button_id, button_task_callback_t on_press,button_task_callback_t on_long_press)
 {
 	
 	buttons[button_id].state = BUTTON_STATE_RELEASED;
@@ -45,6 +50,14 @@ void button_task_init(uint32_t button_id, button_task_callback_t on_press)
 	
 	
 	buttons[button_id].on_press_cb = on_press;
+	if (on_long_press != NULL)
+	{	
+		buttons[button_id].on_long_press_cb = on_long_press;
+		buttons[button_id].long_press_enabled = true;
+	}
+	else
+		buttons[button_id].long_press_enabled = false;
+	buttons[button_id].reported = false;
 
 }
 
@@ -85,7 +98,13 @@ void button_task_handle(void) //Для одинаковых кнопок, в ц�
 					{
 						buttons[button_id].state = BUTTON_STATE_PRESSED;
 						buttons[button_id].presses++;
-						buttons[button_id].on_press_cb();
+						buttons[button_id].press_started_us = systime_us();
+						
+						if (buttons[button_id].long_press_enabled == false) //Если короткое - выполняем
+						{
+							buttons[button_id].on_press_cb();
+							buttons[button_id].reported = true;
+						}
 					}
 					else 
 						buttons[button_id].state = BUTTON_STATE_RELEASED;
@@ -95,27 +114,52 @@ void button_task_handle(void) //Для одинаковых кнопок, в ц�
 			}
 			case BUTTON_STATE_PRESSED:
 			{
-				if (!button_pressed)
-					
-				{
-					buttons[button_id].last_pressed_us = now_us;
-					buttons[button_id].state = BUTTON_STATE_RELEASING;				
+								
+				if (buttons[button_id].long_press_enabled)
+				{	
+					if (systime_period_elapsed(&buttons[button_id].press_started_us, LONG_PRESS_US) 
+						&& buttons[button_id].reported == false)
+					{
+						buttons[button_id].on_long_press_cb();
+						buttons[button_id].reported = true;	
+						
+					}
 				}
-				break;
+				
+			
+				if (!button_pressed)
+					{
+						buttons[button_id].last_pressed_us = now_us;
+						buttons[button_id].state = BUTTON_STATE_RELEASING;				
+					}
+					break;
 			}
 			
 			case BUTTON_STATE_RELEASING:
 			{
+				
 				if (systime_period_elapsed(&buttons[button_id].last_pressed_us, DEBOUNCE_US))
 				{
 					if (!button_pressed)
-						buttons[button_id].state = BUTTON_STATE_PRESSED;
-					else 
+						
+					{
 						buttons[button_id].state = BUTTON_STATE_RELEASED;
+						if (buttons[button_id].reported == false)
+						{
+							buttons[button_id].on_press_cb();
+							
+						}
+						else
+							buttons[button_id].reported = false;
+					}
+					else 
+					{
+						buttons[button_id].state = BUTTON_STATE_PRESSED;
+					}
 				}
 				break;
 			}
-			
+
 		}
 		
     }
@@ -147,3 +191,6 @@ bool button_task_get_info(uint32_t button_id, button_info_t *info)
 	info->presses = buttons[button_id].presses;
 	return true;
 }
+
+void noaction (void)
+{}
