@@ -1,7 +1,14 @@
+c
 #pragma once
 
 #include <stdint.h>
 #include <stdbool.h>
+
+typedef enum {
+    PLATFORM_BUTTON_1 = 0,
+    PLATFORM_BUTTON_2,
+    PLATFORM_BUTTON_COUNT
+} platform_button_t;
 
 // запускает стандартный ввод-вывод и настраивает выводы
 void platform_init(void);
@@ -10,4 +17,4 @@ void platform_led_set(bool on);
 bool platform_led_get(void);
 
 // нажата ли кнопка сейчас, без подавления дребезга
-bool platform_button_read(uint32_t btn);
+bool platform_button_read(platform_button_t btn);
