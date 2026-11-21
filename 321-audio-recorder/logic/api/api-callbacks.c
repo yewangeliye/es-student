@@ -109,7 +109,7 @@ static void print_led_state(void)
 			break;
 		}
 	}
-	
+
 	return;
 }
 
@@ -160,12 +160,12 @@ static void cmd_pi_start(const command_t *command)
 			return;
 		}
 	}	 
-	
+
 	if (pi_task_start(terms))
 		printf("pi: started, %ld terms\n", terms);
 	else 
 		printf("error: pi is busy\n");
-   
+
 }
 
 static void cmd_pi(const command_t *command)
@@ -184,7 +184,7 @@ static void cmd_pi(const command_t *command)
     }
 	else 
 		printf("pi: running\n");
-   
+
 }
 
 static void cmd_profiling(const command_t *command)
@@ -252,14 +252,14 @@ static void cmd_led_period(const command_t *command)
 static void cmd_button(const command_t *command)
 {
 	uint32_t id = 0;
-	
+
 	button_info_t info;
 	while (button_task_get_info(id, &info))
 	{	
 		char *state; //max string length
 		if (info.state) state = "pressed";
 		else state = "released";
-		
+
 		printf("button %lu: %s, presses %llu\n", 
 				(id + 1), state, info.presses);
 		id++;
@@ -272,7 +272,7 @@ static void cmd_get_voltage(const command_t *command)
 {
 	float voltage = platform_voltage_read();
 	printf("voltage: %.03f V\n", voltage);
-	
+
 	return;
 }
 
@@ -280,7 +280,7 @@ static void cmd_get_temp(const command_t *command)
 {
 	float temp = platform_temp_read();
 	printf("temp: %.01f C\n", temp);
-	
+
 	return;
 }
 
@@ -300,7 +300,7 @@ static void cmd_tm_start(const command_t *command)
 			return;
 		}
 	}	
-	
+
 	if (telemetry_task_start(period_ms))	
 		printf("telemetry: started, period %lu ms\n", period_ms);
 	else 
@@ -343,12 +343,12 @@ static void cmd_timer_blink_start(const command_t *command)
     }
 
     led_task_set_state(LED_STATE_OFF);
-	printf("timer_blink: started, %lu ms\n", period_ms);
-	
+	printf("timer_blink: started, period %lu ms\n", period_ms);
+
 }
 
 static void cmd_timer_blink_stop(const command_t *command)
 {
-	
+
 	printf("timer_blink: stopped, %lu toggles\n", platform_blink_stop());
 }
