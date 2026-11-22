@@ -373,7 +373,7 @@ static void cmd_timer_blink_stop(const command_t *command)
 	printf("timer_blink: stopped, %lu toggles\n", platform_blink_stop());
 }
 
-tatic void cmd_cap_start(const command_t *command)
+static void cmd_cap_start(const command_t *command)
 {
 	telemetry_state_t tm_state = telemetry_task_get_state();
 	if (tm_state == TELEMETRY_STATE_RUN)
