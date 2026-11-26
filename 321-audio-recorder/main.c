@@ -16,6 +16,7 @@
 #include "pi-task/pi-task.h"
 #include "telemetry-task/telemetry-task.h"
 #include "block-task/block-task.h"
+#include "stream-task/stream-task.h"
 #include "api/api.h"
 
 
@@ -36,6 +37,7 @@ typedef enum {
 	STOPWATCH_PI,
 	STOPWATCH_TELEMETRY,
 	STOPWATCH_BLOCK,
+	STOPWATCH_STREAM,
 } stopwatch;
 
 
@@ -56,6 +58,7 @@ int main()
 	button_task_init(BUTTON_STATE, led_task_next_state, NULL);
 	pi_task_init();
 	telemetry_task_init(api_print_telemetry);
+	stream_task_init(api_send_frame);
 	
 	profiling_stopwatch_init(STOPWATCH_LOOP, "loop");
 	profiling_stopwatch_init(STOPWATCH_COMMAND, "command");
@@ -64,6 +67,7 @@ int main()
 	profiling_stopwatch_init(STOPWATCH_PI, "pi");
 	profiling_stopwatch_init(STOPWATCH_TELEMETRY, "telemetry");
 	profiling_stopwatch_init(STOPWATCH_TELEMETRY, "block");
+	profiling_stopwatch_init(STOPWATCH_STREAM, "stream");
 	
 	LOG_INF("%s %s\n", FIRMWARE_NAME, FIRMWARE_VERSION);
 	
@@ -90,6 +94,10 @@ int main()
 		profiling_start(STOPWATCH_BLOCK);
 		block_task_handle();
 		profiling_stop(STOPWATCH_BLOCK);	
+
+		profiling_start(STOPWATCH_STREAM);
+		stream_task_handle();
+		profiling_stop(STOPWATCH_STREAM);		
 		 
 		profiling_start(STOPWATCH_COMMAND);
 		// принятая строка становится командой, команда — действием прибора
