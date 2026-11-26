@@ -345,7 +345,7 @@ void platform_capture_get(platform_capture_t *capture)
     
 }
 
-static void adc_free_running(void bits8)
+static void adc_free_running(bool bits8)
 {
     adc_select_input(ADC_CHANNEL);
     adc_fifo_setup(true, true, 1, false, bits8);
