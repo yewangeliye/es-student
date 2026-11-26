@@ -107,7 +107,9 @@ int main()
 			api_handle(command);
 		}
 		profiling_stop(STOPWATCH_COMMAND);
-		
+
+		platform_watchdog_feed();
+
 		profiling_stop(STOPWATCH_LOOP);
     }
 	
