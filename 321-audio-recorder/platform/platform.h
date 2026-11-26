@@ -12,6 +12,8 @@
 
 #define PLATFORM_BLOCK_MAX 8192
 
+#define MIC_DEFAULT_WINDOW_MS 100
+
 // запускает стандартный ввод-вывод и настраивает выводы
 void platform_init(void);
 
@@ -96,3 +98,5 @@ void platform_watchdog_feed(void);
 
 // был ли последний сброс по сторожевому таймеру и сколько таких сбросов подряд
 bool platform_watchdog_caused_reset(uint32_t *restarts);
+
+float platform_adc_volts(float code);
